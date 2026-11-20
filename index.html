@@ -70,7 +70,7 @@ nav .on i{background:var(--bar)}
 nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style></head><body>
 <header id="h"></header><main id="v"></main>
-<nav><button data-t="log" onclick="tab('log')"><i><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></i><small>Log</small></button><button data-t="list" onclick="tab('list')"><i><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></i><small>List</small></button><button data-t="rep" onclick="tab('rep')"><i><svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-12"/></svg></i><small>Report</small></button><button data-t="set" onclick="tab('set')"><i><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></i><small>Setup</small></button></nav>
+<nav><button data-t="log" onclick="tab('log')"><i><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></i><small>Log</small></button><button data-t="list" onclick="tab('list')"><i><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></i><small>List</small></button><button data-t="plan" onclick="tab('plan')"><i><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg></i><small>Plan</small></button><button data-t="rep" onclick="tab('rep')"><i><svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-12"/></svg></i><small>Report</small></button><button data-t="set" onclick="tab('set')"><i><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></i><small>Setup</small></button></nav>
 <div id="t"></div>
 <script>
 const $=s=>document.querySelector(s),K='tl1';
@@ -99,7 +99,7 @@ const PC=['#ff8f95','#61c0bf','#f9c784','#a3d9b1','#b8a9e8','#8cc7f0','#f4a6d7',
 const newL=()=>({k:'e',date:today(),det:'',amt:'',m:S.last.m,c:S.last.c||B(),cat:S.cats[0],by:S.owner,p:[...S.last.p],mode:'eq',ex:{},wl:'',wb:'',wc:'',wp:'',wf:''});
 function tab(t){T=t||T;if(!L)L=newL();th();
  $('#h').innerHTML=`<div class="hb"><svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#61c0bf"/><path d="M11.4 14v-2.5a4.6 4.6 0 0 1 9.2 0V14" fill="none" stroke="#fae3d9" stroke-width="1.3" stroke-linecap="round"/><rect x="8.6" y="13.4" width="14.8" height="9.6" rx="2.2" fill="#fae3d9"/><circle cx="16" cy="17.3" r="1.75" fill="#ff8f95"/><path d="M14.4 18.1 16 21.3l1.6-3.2z" fill="#ff8f95"/><circle cx="16" cy="17.3" r=".65" fill="#fae3d9"/></svg><div><b>Wanderpurse</b><small>budget · split · forex</small></div><button class="x" onclick="tg()">${th()=='dark'?'☀️':'🌙'}</button></div><div class="ht"><select onchange="S.cur=+this.value;L=null;save();tab()">${S.trips.map(x=>`<option value="${x.id}" ${x.id==S.cur?'selected':''}>${x.cid?'☁ ':''}${esc(x.name)}</option>`).join('')}</select><button class="x" onclick="nt()">＋</button></div>`;
- $('#v').innerHTML={log:vLog,list:vList,rep:vRep,set:vSet}[T]();
+ $('#v').innerHTML={log:vLog,list:vList,plan:vPlan,rep:vRep,set:vSet}[T]();
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==T));upd()}
 function nt(){const n=prompt('New trip name');if(!n)return;const t=mk(n,B());t.bp=S.owner?[S.owner]:[];S.trips.push(t);S.cur=t.id;L=null;save();tab('set')}
 function dt(){const z=Z();if(S.trips.length<2)return alert('Keep at least one trip');
@@ -180,6 +180,30 @@ function delW(id){if(!okc())return;const z=Z(),n=z.w.filter(x=>x.id!=id);
  if(z.tx.some(t=>t.cur!=z.base&&!n.some(x=>x.cur==t.cur)))return alert('Entries still use that currency, so the withdrawal stays');
  if(confirm('Delete this withdrawal?')){z.w=n;cd('w',id);save();tab()}}
 function tb(i){const z=Z(),p=S.people[i],j=z.bp.indexOf(p);j<0?z.bp.push(p):z.bp.splice(j,1);save();tab()}
+let P=null;
+const newP=()=>({date:Z().start||today(),time:'',title:'',place:'',url:'',cat:S.cats.includes('Activities')?'Activities':S.cats[0],est:''});
+function vPlan(){
+ if(!P)P=newP();
+ const z=Z(),b=esc(B()),it=z.it||[],tot=it.reduce((s,x)=>s+(+x.est||0),0);
+ const mp=x=>x.url||(x.place?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(x.place):'');
+ const ds={};it.forEach(x=>(ds[x.date]=ds[x.date]||[]).push(x));
+ const o=(a,v)=>a.map(c=>`<option value="${esc(c)}" ${c==v?'selected':''}>${ce(c)} ${esc(c)}</option>`).join('');
+ let h=`<div class="card"><div class="two"><div><div class="mu">Estimated total</div><b>${f(tot)} ${b}</b></div><div><div class="mu">${z.budget?'Budget':'Stops'}</div><b>${z.budget?f(z.budget)+' '+b:it.length}</b></div></div>${z.budget?`<div class="mu" style="margin-top:6px">${tot<=z.budget?'Within budget by '+f(z.budget-tot):'Over budget by '+f(tot-z.budget)} ${b}</div>`:''}</div>
+<div class="card"><h3>${P.id?'Edit stop':'Add a stop'}</h3>
+<div class="two"><label>Date<input type="date" value="${P.date}" oninput="P.date=this.value"></label><label>Time<input type="time" value="${P.time}" oninput="P.time=this.value"></label></div>
+<label>What<input value="${esc(P.title)}" placeholder="e.g. Dinner at Pho 24" oninput="P.title=this.value"></label>
+<label>Place<input value="${esc(P.place)}" placeholder="Name or address" oninput="P.place=this.value"></label>
+<label>Google Maps link (optional)<input type="url" value="${esc(P.url)}" placeholder="Paste a link from Google Maps" oninput="P.url=this.value"></label>
+<div class="two"><label>Category<select onchange="P.cat=this.value">${o(S.cats,P.cat)}</select></label><label>Estimate (${b})<input type="number" inputmode="decimal" step="any" value="${esc(P.est)}" oninput="P.est=this.value"></label></div>
+<button class="btn" onclick="addI()">${P.id?'Save changes':'Add stop'}</button>${P.id?`<div class="chips" style="margin-top:8px"><button class="chip" onclick="P=newP();tab()">Cancel edit</button></div>`:''}</div>`;
+ Object.keys(ds).sort().forEach(d=>{const e=ds[d].sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')),sb=e.reduce((s,x)=>s+(+x.est||0),0);
+  h+=`<div class="g"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}<small>${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} stop${e.length==1?'':'s'}</small></span><span>${f(sb)} ${b}</span></div>${e.map(x=>{const m=mp(x);return`<div class="it"><div><div class="mu">${esc(x.time||'')}</div><b>${ce(x.cat)} ${esc(x.title)}</b>${x.place?`<div class="mu">${esc(x.place)}</div>`:''}${m?`<a class="chip" style="display:inline-block;margin-top:6px;text-decoration:none" href="${esc(m)}" target="_blank" rel="noopener">📍 Open in Maps</a>`:''}</div><div class="r"><b>${x.est?f(x.est):''}</b></div><button class="x" onclick="ei(${x.id})">✎</button><button class="x" onclick="di(${x.id})">✕</button></div>`}).join('')}</div>`});
+ return h+(it.length?'':'<div class="mu">No stops yet. Add the first one above.</div>')}
+function addI(){if(!okc())return;if(!P.title.trim())return alert('Enter what or where');
+ const z=Z();z.it=z.it||[];const o={id:P.id||Date.now(),date:P.date,time:P.time||'',title:P.title.trim(),place:(P.place||'').trim(),url:(P.url||'').trim(),cat:P.cat,est:+P.est||0};
+ const i=z.it.findIndex(x=>x.id==o.id);i<0?z.it.push(o):z.it[i]=o;cw('it',o);save();const d=P.date;P=newP();P.date=d;tab('plan');toast('Saved')}
+function ei(id){P={...Z().it.find(x=>x.id==id)};P.est=P.est||'';tab('plan');scrollTo(0,0)}
+function di(id){if(!okc())return;if(confirm('Delete this stop?')){Z().it=Z().it.filter(x=>x.id!=id);cd('it',id);save();tab()}}
 function vRep(){
  const z=Z(),a=agg(),b=esc(B());
  if(!z.tx.length)return'<div class="card mu">No entries yet.</div>';
@@ -202,6 +226,8 @@ ${rw('Spent',f(bs)+' '+b)}${z.budget?rw('Left',f(left)+' '+b):''}${rw('Average p
 ${Object.entries(by).map(([p,v])=>{const i=S.people.indexOf(p);return rw(esc(p),f(v)+' '+b,i>=0?`<label style="display:inline;margin:0"><input type="checkbox" style="display:inline;width:auto" ${z.pr[p]?'checked':''} onchange="Z().pr[S.people[${i}]]=this.checked;save();tab()"> received</label>`:'')}).join('')}</div>`}
  const wl=cu().filter(c=>c!=B()).flatMap(c=>S.people.map(p=>{const g=z.w.filter(x=>x.cur==c&&(x.who||S.owner)==p).reduce((s,x)=>s+x.fc,0),sp=z.tx.filter(t=>t.cur==c&&t.by==p&&t.m=='cash').reduce((s,t)=>s+t.amt,0);return g||sp?rw(esc(p)+' · '+esc(c)+' cash',f(g-sp)+' '+esc(c),`Withdrawn ${f(g)} · spent ${f(sp)}`):''})).join('');
  if(wl)h+=`<div class="card"><h3>Cash wallets</h3>${wl}</div>`;
+ const es={};(z.it||[]).forEach(x=>{if(x.est)es[x.cat]=(es[x.cat]||0)+x.est});
+ if(Object.keys(es).length){const et=Object.values(es).reduce((s,v)=>s+v,0);h+=`<div class="card"><h3>Plan vs actual</h3>${Object.keys(es).map(c=>rw(`${ce(c)} ${esc(c)}`,`${f(a.cat[c]||0)} / ${f(es[c])} ${b}`,((a.cat[c]||0)/es[c]*100).toFixed(0)+'% of estimate')).join('')}${rw('All spending',`${f(a.tot)} / ${f(et)} ${b}`,'actual / estimated from the itinerary')}</div>`}
  const src={cat:[a.cat,ce],per:[a.per,null],pay:[a.pay,null]}[RV];
  h+=`<div class="card"><h3>Spending breakdown</h3><div class="chips">${[['cat','Category'],['per','Person'],['pay','Payment']].map(([k,n])=>`<button class="chip ${RV==k?'on':''}" onclick="RV='${k}';tab()">${n}</button>`).join('')}</div>${pie(src[0])}${list(src[0],src[1])}</div>`;
  h+=`<div class="card"><h3>By day</h3>${Object.entries(a.day).sort().map(([d,v])=>rw(d,f(v)+' '+b)).join('')}</div>`;
@@ -280,7 +306,7 @@ const cfg=(await import('./config.js')).default;if(!cfg.apiKey)throw 0;
 const [{initializeApp},A,F]=await Promise.all([import(U+'firebase-app.js'),import(U+'firebase-auth.js'),import(U+'firebase-firestore.js')]);
 const app=initializeApp(cfg),au=A.getAuth(app),db=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})});
 const subs={};let top=null;
-const sub=cid=>{if(subs[cid])return;subs[cid]=['tx','w'].map(k=>F.onSnapshot(F.collection(db,'trips',cid,k),s=>cloud.col(cid,k,s.docs.map(d=>d.data()))))};
+const sub=cid=>{if(subs[cid])return;subs[cid]=['tx','w','it'].map(k=>F.onSnapshot(F.collection(db,'trips',cid,k),s=>cloud.col(cid,k,s.docs.map(d=>d.data()))))};
 const stop=()=>{Object.values(subs).flat().forEach(u=>u());for(const k in subs)delete subs[k];if(top)top();top=null};
 const go=u=>{stop();if(!u||!u.emailVerified)return;top=F.onSnapshot(F.query(F.collection(db,'trips'),F.where('members','array-contains',u.email)),s=>s.docChanges().forEach(c=>{const id=c.doc.id;if(c.type=='removed'){(subs[id]||[]).forEach(x=>x());delete subs[id];cloud.gone(id)}else{cloud.trip(id,c.doc.data());sub(id)}}),e=>toast('Sync error: '+e.code))};
 A.onAuthStateChanged(au,async u=>{if(u&&u.emailVerified){try{await u.getIdToken(true)}catch(e){}}window.CU=u?{email:u.email,ok:u.emailVerified}:null;go(u);cloud.auth()});
@@ -300,7 +326,7 @@ window.FB={
  kill:c=>F.deleteDoc(F.doc(db,'trips',c)),
  share:async z=>{await au.currentUser.getIdToken(true);const me=au.currentUser.email,r=F.doc(F.collection(db,'trips'));z.cid=r.id;z.owner=me;z.members=[me];
   try{await F.setDoc(r,{...meta(z),owner:me,members:[me]});
-   const all=[...z.tx.map(o=>['tx',o]),...z.w.map(o=>['w',o])];
+   const all=[...z.tx.map(o=>['tx',o]),...z.w.map(o=>['w',o]),...(z.it||[]).map(o=>['it',o])];
    for(let i=0;i<all.length;i+=400){const b=F.writeBatch(db);all.slice(i,i+400).forEach(([k,o])=>b.set(ref(r.id,k,o.id),o));await b.commit()}
    save()}catch(e){delete z.cid;throw e}}
 };
