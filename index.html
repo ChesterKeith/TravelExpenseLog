@@ -5,10 +5,10 @@
 <meta name="theme-color" content="#0f766e">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
-<title>Biyahe</title>
+<title>Wanderpurse</title>
 <style>
-:root{color-scheme:light;--bg:#fae3d9;--cd:#fff7f3;--tx:#2b3a42;--mu:#5f6d73;--ac:#61c0bf;--on:#12363a;--ac2:#1f7a77;--ln:#efcfc3;--bad:#c0392b;--bar:#bbded6;--hd:#ffb6b9;--hx:#3b2a2e}
-:root[data-theme=dark]{color-scheme:dark;--bg:#141b1f;--cd:#1d272c;--tx:#eaf1f2;--mu:#93a5ab;--ac:#61c0bf;--on:#0c2a2d;--ac2:#7fd6d4;--ln:#2c3a40;--bad:#ff8a80;--bar:#2d5654;--hd:#243338;--hx:#ffb6b9}
+:root{color-scheme:light;--bg:#fcf7f4;--cd:#fff;--tx:#1f2a30;--mu:#66757c;--ac:#61c0bf;--on:#0e3236;--ac2:#237f7c;--ln:#f0e6e1;--bad:#c0392b;--bar:#e4f2ef;--hd:#fff;--hx:#1f2a30;--sh:0 1px 2px rgba(60,40,30,.07),0 2px 8px rgba(60,40,30,.05)}
+:root[data-theme=dark]{color-scheme:dark;--bg:#141b1f;--cd:#1d272c;--tx:#eaf1f2;--mu:#93a5ab;--ac:#61c0bf;--on:#0c2a2d;--ac2:#7fd6d4;--ln:#2c3a40;--bad:#ff8a80;--bar:#27413f;--hd:#1d272c;--hx:#eaf1f2;--sh:none}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--tx);font:16px/1.35 system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom))}
@@ -51,9 +51,26 @@ nav .on{color:var(--ac2);opacity:1}
 .g .it{border:0;border-radius:0;border-top:1px solid var(--ln);margin:0;background:none}
 .pie{display:block;width:210px;max-width:70%;margin:6px auto 10px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+header{border:0;box-shadow:0 1px 0 var(--ln)}
+.card,.g,.it{border:0;box-shadow:var(--sh);border-radius:16px}
+.it{border-radius:14px}
+.g .it{box-shadow:none;border-top:1px solid var(--ln);border-radius:0}
+input,select{border:0;background:var(--bg);border-radius:12px;padding:12px}
+input:focus,select:focus{outline:2px solid var(--ac)}
+.ht select{background:var(--bg)}
+.btn{border-radius:24px;padding:14px;letter-spacing:.2px}
+.chip{border:0;background:var(--bg);padding:8px 14px}
+.chip.on{background:var(--bar);color:var(--ac2);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--ac)}
+h3{font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--mu);margin:2px 0 8px}
+.gh{background:none;border-bottom:1px solid var(--ln)}
+nav{border:0;box-shadow:0 -1px 0 var(--ln)}
+nav button{opacity:1;font-size:inherit;padding:8px 0 10px}
+nav i{width:60px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center}
+nav .on i{background:var(--bar)}
+nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style></head><body>
 <header id="h"></header><main id="v"></main>
-<nav><button data-t="log" onclick="tab('log')">✏️<small>Log</small></button><button data-t="list" onclick="tab('list')">📋<small>List</small></button><button data-t="rep" onclick="tab('rep')">📊<small>Report</small></button><button data-t="set" onclick="tab('set')">⚙️<small>Setup</small></button></nav>
+<nav><button data-t="log" onclick="tab('log')"><i><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></i><small>Log</small></button><button data-t="list" onclick="tab('list')"><i><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></i><small>List</small></button><button data-t="rep" onclick="tab('rep')"><i><svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-12"/></svg></i><small>Report</small></button><button data-t="set" onclick="tab('set')"><i><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></i><small>Setup</small></button></nav>
 <div id="t"></div>
 <script>
 const $=s=>document.querySelector(s),K='tl1';
@@ -63,7 +80,9 @@ let S;try{S={...D,...JSON.parse(localStorage.getItem(K)||'{}')}}catch(e){S={...D
 if(!S.trips.length){const t=mk(S.trip||'My Trip',S.base||'PHP');t.w=S.w||[];t.tx=S.tx||[];S.trips=[t];S.cur=t.id}
 ['trip','base','w','tx'].forEach(k=>delete S[k]);
 const Z=()=>S.trips.find(t=>t.id==S.cur)||S.trips[0],B=()=>Z().base;
-const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Could not save: storage is full or blocked')}};
+let RM=false,MT;
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Could not save: storage is full or blocked')}
+ const z=Z();if(!RM&&z.cid&&window.FB&&window.CU&&CU.ok){clearTimeout(MT);MT=setTimeout(()=>FB.meta(z).catch(()=>{}),700)}};
 const f=x=>x.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
@@ -72,18 +91,21 @@ const cu=()=>[...new Set([B(),...Z().w.map(x=>x.cur)])];
 const rate=c=>{if(c==B())return 1;let p=0,q=0;Z().w.forEach(x=>{if(x.cur==c){p+=x.php;q+=x.fc}});return q?p/q:null};
 const toast=m=>{const e=$('#t');e.textContent=m;e.classList.add('s');setTimeout(()=>e.classList.remove('s'),1200)};
 let T=S.owner?'log':'set',L=null,RV='cat';
-const th=()=>{const d=S.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=d;document.querySelector('meta[name=theme-color]').content=d=='dark'?'#243338':'#ffb6b9';return d};
+const th=()=>{const d=S.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=d;document.querySelector('meta[name=theme-color]').content=d=='dark'?'#1d272c':'#ffffff';return d};
 function tg(){S.theme=th()=='dark'?'light':'dark';save();tab()}
 const CE={Food:'🍜',Drink:'🧋','Major Transpo':'✈️','Minor Transpo':'🛺',Activities:'🎡',Shopping:'🛍️',Grocery:'🛒',Accommodation:'🏨',Pasabuy:'📦',Other:'✨'};
 const ce=c=>(S.ce&&S.ce[c])||CE[c]||'🏷️';
 const PC=['#ff8f95','#61c0bf','#f9c784','#a3d9b1','#b8a9e8','#8cc7f0','#f4a6d7','#d9c27a','#7fb7a4','#e59866'];
-const newL=()=>({k:'e',date:today(),det:'',amt:'',m:S.last.m,c:S.last.c||B(),cat:S.cats[0],by:S.owner,p:[...S.last.p],mode:'eq',ex:{},wl:'',wc:'',wp:'',wf:''});
+const newL=()=>({k:'e',date:today(),det:'',amt:'',m:S.last.m,c:S.last.c||B(),cat:S.cats[0],by:S.owner,p:[...S.last.p],mode:'eq',ex:{},wl:'',wb:'',wc:'',wp:'',wf:''});
 function tab(t){T=t||T;if(!L)L=newL();th();
- $('#h').innerHTML=`<div class="hb"><svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#61c0bf"/><circle cx="16" cy="16" r="9.3" fill="#fae3d9"/><path d="M16 9.6a4.2 4.2 0 0 0-4.2 4.2c0 3.1 4.2 8.1 4.2 8.1s4.2-5 4.2-8.1A4.2 4.2 0 0 0 16 9.6z" fill="#ff8f95"/><circle cx="16" cy="13.6" r="1.7" fill="#fae3d9"/></svg><div><b>Biyahe</b><small>budget · split · forex</small></div><button class="x" onclick="tg()">${th()=='dark'?'☀️':'🌙'}</button></div><div class="ht"><select onchange="S.cur=+this.value;L=null;save();tab()">${S.trips.map(x=>`<option value="${x.id}" ${x.id==S.cur?'selected':''}>${esc(x.name)}</option>`).join('')}</select><button class="x" onclick="nt()">＋</button></div>`;
+ $('#h').innerHTML=`<div class="hb"><svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#61c0bf"/><path d="M11.4 14v-2.5a4.6 4.6 0 0 1 9.2 0V14" fill="none" stroke="#fae3d9" stroke-width="1.3" stroke-linecap="round"/><rect x="8.6" y="13.4" width="14.8" height="9.6" rx="2.2" fill="#fae3d9"/><circle cx="16" cy="17.3" r="1.75" fill="#ff8f95"/><path d="M14.4 18.1 16 21.3l1.6-3.2z" fill="#ff8f95"/><circle cx="16" cy="17.3" r=".65" fill="#fae3d9"/></svg><div><b>Wanderpurse</b><small>budget · split · forex</small></div><button class="x" onclick="tg()">${th()=='dark'?'☀️':'🌙'}</button></div><div class="ht"><select onchange="S.cur=+this.value;L=null;save();tab()">${S.trips.map(x=>`<option value="${x.id}" ${x.id==S.cur?'selected':''}>${x.cid?'☁ ':''}${esc(x.name)}</option>`).join('')}</select><button class="x" onclick="nt()">＋</button></div>`;
  $('#v').innerHTML={log:vLog,list:vList,rep:vRep,set:vSet}[T]();
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==T));upd()}
 function nt(){const n=prompt('New trip name');if(!n)return;const t=mk(n,B());t.bp=S.owner?[S.owner]:[];S.trips.push(t);S.cur=t.id;L=null;save();tab('set')}
-function dt(){if(S.trips.length<2)return alert('Keep at least one trip');if(confirm('Delete this trip and all its entries?')){S.trips=S.trips.filter(t=>t.id!=S.cur);S.cur=S.trips[0].id;L=null;save();tab()}}
+function dt(){const z=Z();if(S.trips.length<2)return alert('Keep at least one trip');
+ if(z.cid){if(!(window.CU&&CU.ok&&z.owner==CU.email))return alert('Only the trip owner can delete a shared trip.');if(!confirm('Delete this trip for everyone?'))return;FB.kill(z.cid).catch(e=>alert(msg(e)))}
+ else if(!confirm('Delete this trip and all its entries?'))return;
+ S.trips=S.trips.filter(t=>t.id!=z.id);S.cur=S.trips[0].id;L=null;save();tab()}
 function upd(){const e=$('#rem');if(!e)return;const a=+L.amt||0,k=L.p.length;
  if(L.mode=='eq'){e.textContent=k&&a?'Each: '+f(a/k):'';e.style.color=''}
  else{const d=Math.round((a-L.p.reduce((t,x)=>t+(+L.ex[x]||0),0))*100)/100;e.textContent=d==0?'Split matches the amount':'Left to assign: '+f(d);e.style.color=d==0?'':'var(--bad)'}}
@@ -95,13 +117,14 @@ function vLog(){
  if(L.k=='w')return`<div class="card">${kd}
 <label>Date<input type="date" value="${L.date}" oninput="L.date=this.value"></label>
 <label>Label<input value="${esc(L.wl)}" placeholder="e.g. ATM at airport" oninput="L.wl=this.value"></label>
+<label>Withdrawn by<select onchange="L.wb=this.value">${o(S.people,L.wb||S.owner)}</select></label>
 <label>Foreign currency<input value="${esc(L.wc)}" placeholder="e.g. JPY" list="cl" oninput="L.wc=this.value"></label>
 <datalist id="cl">${cu().filter(c=>c!=B()).map(c=>`<option>${esc(c)}</option>`).join('')}</datalist>
 <div class="two"><label>${esc(B())} paid (fees included)<input type="number" inputmode="decimal" step="any" value="${esc(L.wp)}" oninput="L.wp=this.value"></label>
 <label>Foreign cash received<input type="number" inputmode="decimal" step="any" value="${esc(L.wf)}" oninput="L.wf=this.value"></label></div>
 <div class="mu">This sets the rate for this trip: total ${esc(B())} paid ÷ total foreign cash received.</div><br>
 <button class="btn" onclick="addW()">Save withdrawal</button></div>`;
- const own=L.by==S.owner,cash=!own||L.m=='cash';
+ const own=true,cash=L.m=='cash';
  const mc=[['debit',S.acc.debit],['credit',S.acc.credit],['cash','Cash']].map(([k,n])=>`<button class="chip ${L.m==k?'on':''}" onclick="L.m='${k}';tab()">${esc(n)}</button>`).join('');
  const pc=S.people.map((p,i)=>`<button class="chip ${L.p.includes(p)?'on':''}" onclick="tp(${i})">${esc(p)}</button>`).join('');
  const gc=S.groups.map((g,i)=>`<button class="chip" onclick="gp(${i})">${esc(g.n)}</button>`).join('');
@@ -121,24 +144,24 @@ ${ex}<div class="mu" id="rem"></div><br><button class="btn" onclick="add()">Save
 function tp(i){const p=S.people[i],j=L.p.indexOf(p);j<0?L.p.push(p):L.p.splice(j,1);tab()}
 function gp(i){L.p=S.groups[i].p.filter(p=>S.people.includes(p));tab()}
 function sg(){const n=prompt('Group name');if(n&&L.p.length){S.groups.push({n,p:[...L.p]});save();tab()}}
-function add(){
+function add(){if(!okc())return;
  const a=+L.amt;if(!(a>0))return alert('Enter an amount');
  if(!L.p.length)return alert('Pick who shares this');
- const own=L.by==S.owner,cash=!own||L.m=='cash',cur=cash?L.c:B();
+ const cash=L.m=='cash',cur=cash?L.c:B();
  let sh;
  if(L.mode=='eq')sh=L.p.map(p=>({p,a:a/L.p.length}));
  else{sh=L.p.map(p=>({p,a:+L.ex[p]||0}));if(Math.abs(sh.reduce((t,x)=>t+x.a,0)-a)>.005)return alert('The split must add up to the amount')}
- Z().tx.push({id:Date.now(),date:L.date,det:L.det||L.cat,cat:L.cat,cur,amt:a,by:L.by,m:own?L.m:'cash',sh});
+ const t={id:Date.now(),date:L.date,det:L.det||L.cat,cat:L.cat,cur,amt:a,by:L.by,m:L.m,sh};Z().tx.push(t);cw('tx',t);
  S.last={m:L.m,c:L.c,p:L.p};save();const d=L.date;L=newL();L.date=d;tab('log');toast('Saved')}
-function addW(){const cur=(L.wc||'').trim().toUpperCase(),php=+L.wp,fc=+L.wf;
+function addW(){if(!okc())return;const cur=(L.wc||'').trim().toUpperCase(),php=+L.wp,fc=+L.wf;
  if(!cur||cur==B()||!(php>0)||!(fc>0))return alert(`Enter a foreign currency code (not ${B()}), the ${B()} paid and the foreign cash received`);
- Z().w.push({id:Date.now(),date:L.date,label:L.wl,cur,php,fc});S.last.m='cash';S.last.c=cur;save();const d=L.date;L=newL();L.date=d;tab('log');toast('Saved')}
-const ml=t=>t.by!=S.owner?'Paid by '+t.by:t.m=='debit'?S.acc.debit:t.m=='credit'?S.acc.credit:'Cash';
+ const w={id:Date.now(),date:L.date,label:L.wl,who:L.wb||S.owner,cur,php,fc};Z().w.push(w);cw('w',w);S.last.m='cash';S.last.c=cur;save();const d=L.date;L=newL();L.date=d;tab('log');toast('Saved')}
+const ml=t=>(t.by==S.owner?'':t.by+' · ')+(t.m=='debit'?(t.by==S.owner?S.acc.debit:'Debit'):t.m=='credit'?(t.by==S.owner?S.acc.credit:'Credit'):'Cash');
 function agg(){const o={tot:0,per:{},paid:{},cat:{},pay:{},day:{}};
  Z().tx.forEach(t=>{const r=rate(t.cur)||0,v=t.amt*r;o.tot+=v;o.paid[t.by]=(o.paid[t.by]||0)+v;
   t.sh.forEach(x=>o.per[x.p]=(o.per[x.p]||0)+x.a*r);
   o.cat[t.cat]=(o.cat[t.cat]||0)+v;
-  const m=t.by!=S.owner?'Paid by '+t.by:t.m=='debit'?S.acc.debit:t.m=='credit'?S.acc.credit:'Cash '+t.cur;
+  const m=ml(t)+(t.m=='cash'&&t.cur!=B()?' '+t.cur:'');
   o.pay[m]=(o.pay[m]||0)+v;o.day[t.date]=(o.day[t.date]||0)+v});
  return o}
 function vList(){
@@ -146,16 +169,16 @@ function vList(){
  const it=[...z.tx.map(t=>({...t,k:'e'})),...z.w.map(w=>({...w,k:'w'}))].sort((x,y)=>y.date.localeCompare(x.date)||y.id-x.id);
  const dt={},cum={};z.tx.forEach(t=>dt[t.date]=(dt[t.date]||0)+t.amt*(rate(t.cur)||0));
  const ds=[...new Set(it.map(t=>t.date))].sort();let run=0;ds.forEach(d=>{run+=dt[d]||0;cum[d]=run});
- const row=t=>{if(t.k=='w')return`<div class="it"><div><b>🏧 ${esc(t.label||'Withdrawal')}</b><div class="mu">1 ${esc(t.cur)} = ${(t.php/t.fc).toFixed(4)} ${b}</div></div><div class="r"><b>${f(t.fc)} ${esc(t.cur)}</b><div class="mu">${f(t.php)} ${b}</div></div><button class="x" onclick="delW(${t.id})">✕</button></div>`;
+ const row=t=>{if(t.k=='w')return`<div class="it"><div><b>🏧 ${esc(t.label||'Withdrawal')}</b><div class="mu">${esc(t.who||S.owner)} · 1 ${esc(t.cur)} = ${(t.php/t.fc).toFixed(4)} ${b}</div></div><div class="r"><b>${f(t.fc)} ${esc(t.cur)}</b><div class="mu">${f(t.php)} ${b}</div></div><button class="x" onclick="delW(${t.id})">✕</button></div>`;
   const r=rate(t.cur)||0;return`<div class="it"><div><b>${ce(t.cat)} ${esc(t.det)}</b><div class="mu">${esc(t.cat)} · ${esc(ml(t))}</div><div class="mu">${t.sh.map(x=>esc(x.p)+' '+f(x.a)).join(' · ')}</div></div><div class="r"><b>${f(t.amt)} ${esc(t.cur)}</b>${t.cur!=B()?`<div class="mu">${f(t.amt*r)} ${b}</div>`:''}</div><button class="x" onclick="del(${t.id})">✕</button></div>`};
  let h=`<div class="card"><div class="mu">Total paid</div><b>${f(a.tot)} ${b}</b><div class="mu" style="margin-top:6px">${Object.entries(a.per).map(([p,v])=>esc(p)+' '+f(v)).join(' · ')}</div></div>`;
  ds.slice().reverse().forEach(d=>{const e=it.filter(t=>t.date==d);
   h+=`<div class="g"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'})}<small>${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} ${e.length==1?'entry':'entries'}</small></span><span style="text-align:right">${f(dt[d]||0)} ${b}<small>Trip total ${f(cum[d])} ${b}</small></span></div>${e.map(row).join('')}</div>`});
  return h+(it.length?'':'<div class="mu">No entries yet.</div>')}
-function del(id){if(confirm('Delete this entry?')){Z().tx=Z().tx.filter(t=>t.id!=id);save();tab()}}
-function delW(id){const z=Z(),n=z.w.filter(x=>x.id!=id);
+function del(id){if(!okc())return;if(confirm('Delete this entry?')){Z().tx=Z().tx.filter(t=>t.id!=id);cd('tx',id);save();tab()}}
+function delW(id){if(!okc())return;const z=Z(),n=z.w.filter(x=>x.id!=id);
  if(z.tx.some(t=>t.cur!=z.base&&!n.some(x=>x.cur==t.cur)))return alert('Entries still use that currency, so the withdrawal stays');
- if(confirm('Delete this withdrawal?')){z.w=n;save();tab()}}
+ if(confirm('Delete this withdrawal?')){z.w=n;cd('w',id);save();tab()}}
 function tb(i){const z=Z(),p=S.people[i],j=z.bp.indexOf(p);j<0?z.bp.push(p):z.bp.splice(j,1);save();tab()}
 function vRep(){
  const z=Z(),a=agg(),b=esc(B());
@@ -167,27 +190,27 @@ function vRep(){
  const list=(o,em)=>Object.entries(o).sort((x,y)=>y[1]-x[1]).map(([k,v],i)=>rw(`<span class="dot" style="background:${PC[i%PC.length]}"></span>${em?em(k)+' ':''}${esc(k)}`,f(v)+' '+b,(v/tot(o)*100).toFixed(1)+'%')).join('');
  const pie=o=>{let c=0;return`<svg class="pie" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--bar)" stroke-width="7"/>${Object.entries(o).sort((x,y)=>y[1]-x[1]).map(([k,v],i)=>{const p=v/tot(o)*100,e=`<circle cx="21" cy="21" r="15.9155" fill="none" stroke="${PC[i%PC.length]}" stroke-width="7" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${25-c}"/>`;c+=p;return e}).join('')}<text x="21" y="20.6" text-anchor="middle" font-size="3.4" font-weight="700" fill="var(--tx)">${f(tot(o))}</text><text x="21" y="25" text-anchor="middle" font-size="2.6" fill="var(--mu)">${b}</text></svg>`};
  const ps=[...new Set([...Object.keys(a.per),...Object.keys(a.paid)])];
- let h=`<div class="card"><h3>💰 Budget</h3><label>Budget (${b})<input type="number" inputmode="decimal" value="${z.budget||''}" onchange="Z().budget=+this.value||0;save();tab()"></label>
+ let h=`<div class="card"><h3>Budget</h3><label>Budget (${b})<input type="number" inputmode="decimal" value="${z.budget||''}" onchange="Z().budget=+this.value||0;save();tab()"></label>
 <div class="mu">Counts the shares of (pasabuy not included)</div><div class="chips">${S.people.map((p,i)=>`<button class="chip ${z.bp.includes(p)?'on':''}" onclick="tb(${i})">${esc(p)}</button>`).join('')}</div>
 ${rw('Spent',f(bs)+' '+b)}${z.budget?rw('Left',f(left)+' '+b):''}${rw('Average per day',f(bs/el)+' '+b)}${z.budget&&rem?rw('Left per remaining day',f(left/rem)+' '+b):''}</div>`;
- h+=`<div class="card"><h3>👥 Per person</h3>${ps.map(p=>{const s=a.per[p]||0,pd=a.paid[p]||0,n=pd-s,i=S.people.indexOf(p);
+ h+=`<div class="card"><h3>Per person</h3>${ps.map(p=>{const s=a.per[p]||0,pd=a.paid[p]||0,n=pd-s,i=S.people.indexOf(p);
   return rw(esc(p),f(s)+' '+b,`Paid ${f(pd)} · ${Math.abs(n)<.005?'even':n>0?'is owed '+f(n):'owes '+f(-n)}`+(p!=S.owner&&i>=0?` · <label style="display:inline;margin:0"><input type="checkbox" style="display:inline;width:auto" ${z.st[p]?'checked':''} onchange="Z().st[S.people[${i}]]=this.checked;save()"> settled</label>`:''))}).join('')}</div>`;
  const pt=z.tx.filter(t=>t.cat=='Pasabuy');
  if(pt.length){const by={};pt.forEach(t=>{const r=rate(t.cur)||0;t.sh.forEach(x=>{if(x.p!=t.by)by[x.p]=(by[x.p]||0)+x.a*r})});
   const ch=Object.values(by).reduce((s,v)=>s+v,0),rc=Object.entries(by).reduce((s,[p,v])=>s+(z.pr[p]?v:0),0);
-  h+=`<div class="card"><h3>🛍️ Pasabuy</h3>${rw('Spent',f(a.cat.Pasabuy)+' '+b)}${rw('Charged to buyers',f(ch)+' '+b)}${rw('Received',f(rc)+' '+b)}${rw('Still to receive',f(ch-rc)+' '+b)}
+  h+=`<div class="card"><h3>Pasabuy</h3>${rw('Spent',f(a.cat.Pasabuy)+' '+b)}${rw('Charged to buyers',f(ch)+' '+b)}${rw('Received',f(rc)+' '+b)}${rw('Still to receive',f(ch-rc)+' '+b)}
 ${Object.entries(by).map(([p,v])=>{const i=S.people.indexOf(p);return rw(esc(p),f(v)+' '+b,i>=0?`<label style="display:inline;margin:0"><input type="checkbox" style="display:inline;width:auto" ${z.pr[p]?'checked':''} onchange="Z().pr[S.people[${i}]]=this.checked;save();tab()"> received</label>`:'')}).join('')}</div>`}
- const wl=cu().filter(c=>c!=B()).map(c=>{const g=z.w.filter(x=>x.cur==c).reduce((s,x)=>s+x.fc,0),sp=z.tx.filter(t=>t.cur==c&&t.by==S.owner&&t.m=='cash').reduce((s,t)=>s+t.amt,0);return rw(esc(c)+' cash left',f(g-sp)+' '+esc(c),`Withdrawn ${f(g)} · spent ${f(sp)}`)}).join('');
- if(wl)h+=`<div class="card"><h3>💵 Cash wallets</h3>${wl}</div>`;
+ const wl=cu().filter(c=>c!=B()).flatMap(c=>S.people.map(p=>{const g=z.w.filter(x=>x.cur==c&&(x.who||S.owner)==p).reduce((s,x)=>s+x.fc,0),sp=z.tx.filter(t=>t.cur==c&&t.by==p&&t.m=='cash').reduce((s,t)=>s+t.amt,0);return g||sp?rw(esc(p)+' · '+esc(c)+' cash',f(g-sp)+' '+esc(c),`Withdrawn ${f(g)} · spent ${f(sp)}`):''})).join('');
+ if(wl)h+=`<div class="card"><h3>Cash wallets</h3>${wl}</div>`;
  const src={cat:[a.cat,ce],per:[a.per,null],pay:[a.pay,null]}[RV];
- h+=`<div class="card"><h3>🥧 Spending breakdown</h3><div class="chips">${[['cat','Category'],['per','Person'],['pay','Payment']].map(([k,n])=>`<button class="chip ${RV==k?'on':''}" onclick="RV='${k}';tab()">${n}</button>`).join('')}</div>${pie(src[0])}${list(src[0],src[1])}</div>`;
- h+=`<div class="card"><h3>📅 By day</h3>${Object.entries(a.day).sort().map(([d,v])=>rw(d,f(v)+' '+b)).join('')}</div>`;
+ h+=`<div class="card"><h3>Spending breakdown</h3><div class="chips">${[['cat','Category'],['per','Person'],['pay','Payment']].map(([k,n])=>`<button class="chip ${RV==k?'on':''}" onclick="RV='${k}';tab()">${n}</button>`).join('')}</div>${pie(src[0])}${list(src[0],src[1])}</div>`;
+ h+=`<div class="card"><h3>By day</h3>${Object.entries(a.day).sort().map(([d,v])=>rw(d,f(v)+' '+b)).join('')}</div>`;
  return h}
 function setOwner(v){v=v.trim();if(!v)return;const o=S.owner;
  if(o){const m=p=>p==o?v:p;S.people=S.people.map(m);S.last.p=S.last.p.map(m);S.groups.forEach(g=>g.p=g.p.map(m));S.trips.forEach(t=>{t.bp=t.bp.map(m);t.tx.forEach(x=>{if(x.by==o)x.by=v;x.sh.forEach(y=>{if(y.p==o)y.p=v})})});L=null}
  else{S.people.unshift(v);Z().bp=[v]}
  S.owner=v;save();tab('set')}
-function addP(){const v=$('#np').value.trim();if(v&&!S.people.includes(v)){S.people.push(v);save();tab('set')}}
+function addP(){const v=$('#np').value.trim();if(v&&!S.people.includes(v)){S.people.push(v);if(Z().cid)Z().ppl=[...(Z().ppl||[]),v];save();tab('set')}}
 function rmP(i){const p=S.people[i];if(p==S.owner)return alert('That is you');if(S.trips.some(t=>t.tx.some(x=>x.by==p||x.sh.some(y=>y.p==p))))return alert('Used in entries, so it stays to keep totals correct');S.people.splice(i,1);save();tab('set')}
 function rmG(i){S.groups.splice(i,1);save();tab('set')}
 function addC(){let v=$('#nc').value.trim(),e='';const m=v.match(/^(\p{Extended_Pictographic}\S*)\s+(.+)$/u);if(m){e=m[1];v=m[2]}if(v&&!S.cats.includes(v)){S.cats.push(v);if(e)S.ce[v]=e;save();tab('set')}}
@@ -199,21 +222,85 @@ function vSet(){const z=Z(),b=esc(z.base);
  const li=(a,fn)=>a.map((x,i)=>`<div class="li"><span>${esc(x)}</span><button class="x" onclick="${fn}(${i})">✕</button></div>`).join('');
  const ad=(id,ph,fn)=>`<div class="two" style="grid-template-columns:1fr auto;margin-top:8px"><input id="${id}" placeholder="${ph}"><button class="btn sm" onclick="${fn}()">Add</button></div>`;
  const cl=cu().filter(c=>c!=z.base).map(c=>`<div class="li"><span>${esc(c)}</span><span class="mu">1 ${esc(c)} = ${rate(c).toFixed(4)} ${b} · ${z.w.filter(x=>x.cur==c).length} withdrawal(s)</span></div>`).join('')||'<div class="mu">Log a withdrawal (Log tab) to add a foreign currency.</div>';
- return`<div class="card"><h3>🧳 This trip</h3>
+ return`<div class="card"><h3>This trip</h3>
 <label>Trip name<input value="${esc(z.name)}" onchange="Z().name=this.value;save();tab()"></label>
 <div class="two"><label>Start<input type="date" value="${z.start}" onchange="Z().start=this.value;save()"></label><label>End<input type="date" value="${z.end}" onchange="Z().end=this.value;save()"></label></div>
 <label>Home currency<input value="${b}" onchange="Z().base=this.value.trim().toUpperCase()||'PHP';save();tab()"></label>
 <button class="btn sm" onclick="dt()">Delete this trip</button></div>
-<div class="card"><h3>💱 Currencies (this trip)</h3><div class="li"><span>${b}</span><span class="mu">home currency</span></div>${cl}</div>
-<div class="card"><h3>🙋 You & your cards</h3><label>Your name<input value="${esc(S.owner)}" onchange="setOwner(this.value)"></label>
+${vCloud()}<div class="card"><h3>Currencies (this trip)</h3><div class="li"><span>${b}</span><span class="mu">home currency</span></div>${cl}</div>
+<div class="card"><h3>You & your cards</h3><label>Your name<input value="${esc(S.owner)}" onchange="setOwner(this.value)"></label>
 <div class="two"><label>Debit card<input value="${esc(S.acc.debit)}" onchange="S.acc.debit=this.value;save()"></label><label>Credit card<input value="${esc(S.acc.credit)}" onchange="S.acc.credit=this.value;save()"></label></div></div>
-<div class="card"><h3>👥 People</h3>${li(S.people,'rmP')}${ad('np','Add person','addP')}</div>
-<div class="card"><h3>🔖 Saved groups</h3>${li(S.groups.map(g=>g.n+' ('+g.p.length+')'),'rmG')||'<div class="mu">Save a group from the Log screen.</div>'}</div>
-<div class="card"><h3>🏷️ Categories</h3>${S.cats.map((c,i)=>`<div class="li"><span><a onclick="ee(${i})">${ce(c)}</a> ${esc(c)}</span><button class="x" onclick="rmC(${i})">✕</button></div>`).join('')}${ad('nc','🎫 Add category','addC')}<div class="mu" style="margin-top:6px">Tip: start with an emoji, e.g. 🎫 Tickets. Tap an emoji in the list to change it.</div></div>
-<div class="card"><h3>💾 Backup</h3><div class="mu">Your data lives only on this phone. Download a backup now and then.</div><br>
+<div class="card"><h3>People</h3>${li(S.people,'rmP')}${ad('np','Add person','addP')}</div>
+<div class="card"><h3>Saved groups</h3>${li(S.groups.map(g=>g.n+' ('+g.p.length+')'),'rmG')||'<div class="mu">Save a group from the Log screen.</div>'}</div>
+<div class="card"><h3>Categories</h3>${S.cats.map((c,i)=>`<div class="li"><span><a onclick="ee(${i})">${ce(c)}</a> ${esc(c)}</span><button class="x" onclick="rmC(${i})">✕</button></div>`).join('')}${ad('nc','🎫 Add category','addC')}<div class="mu" style="margin-top:6px">Tip: start with an emoji, e.g. 🎫 Tickets. Tap an emoji in the list to change it.</div></div>
+<div class="card"><h3>Backup</h3><div class="mu">Your data lives only on this phone. Download a backup now and then.</div><br>
 <button class="btn sm" onclick="bk()">Download backup</button>
 <label class="btn sm" style="display:inline-block;color:var(--on);margin:0 0 0 8px">Restore<input type="file" accept=".json" hidden onchange="rst(this)"></label></div>`}
+var cloud={
+ trip(cid,d){RM=true;try{let z=S.trips.find(t=>t.cid==cid);
+  if(!z){z=mk(d.name,d.base);z.id=Date.now()+S.trips.length;z.cid=cid;S.trips.push(z)}
+  ['name','base','start','end','budget','bp','st','pr','ppl','members','owner'].forEach(k=>{if(d[k]!==undefined)z[k]=d[k]});
+  (d.ppl||[]).forEach(p=>{if(!S.people.includes(p))S.people.push(p)});
+  if(S.owner&&!(z.ppl||[]).includes(S.owner)){z.ppl=[...(z.ppl||[]),S.owner];FB.meta(z).catch(()=>{})}
+  save()}finally{RM=false}cloud.draw()},
+ col(cid,k,a){const z=S.trips.find(t=>t.cid==cid);if(!z)return;z[k]=a;RM=true;save();RM=false;cloud.draw()},
+ gone(cid){S.trips=S.trips.filter(t=>t.cid!=cid);if(!S.trips.length)S.trips.push(mk('My Trip','PHP'));if(!S.trips.some(t=>t.id==S.cur))S.cur=S.trips[0].id;L=null;RM=true;save();RM=false;cloud.draw()},
+ draw(){const a=document.activeElement;if(a&&a.matches&&a.matches('input,select'))return;tab()},
+ auth(){if(T=='set')cloud.draw()}};
+const okc=()=>{const z=Z();if(!z.cid||(window.CU&&CU.ok))return true;alert('This is a shared trip. Sign in under Setup > Cloud sync first.');return false};
+const msg=x=>({'auth/invalid-credential':'Wrong email or password','auth/email-already-in-use':'That email already has an account: use Sign in','auth/weak-password':'Use at least 6 characters','auth/invalid-email':'Invalid email','auth/network-request-failed':'No internet connection','permission-denied':'Not allowed. Check the Firestore rules and that you are a member.'}[x.code]||x.code||'Something went wrong');
+const cw=(k,o)=>{const z=Z();if(z.cid)FB.set(z.cid,k,o).catch(e=>alert(msg(e)))};
+const cd=(k,i)=>{const z=Z();if(z.cid)FB.del(z.cid,k,i).catch(e=>alert(msg(e)))};
+function vCloud(){const z=Z(),c=window.CU,h=t=>`<div class="card"><h3>Cloud sync</h3>${t}</div>`;
+ if(window.FB===undefined)return h('<div class="mu">Loading…</div>');
+ if(!FB)return h('<div class="mu">Not set up. Put your Firebase keys in config.js and upload it.</div>');
+ if(!c)return h(`<label>Email<input id="ce" type="email" autocomplete="username"></label><label>Password<input id="cp" type="password" autocomplete="current-password"></label><button class="btn" onclick="ca('login')">Sign in</button><div class="chips" style="margin-top:10px"><button class="chip" onclick="ca('signup')">Create account</button><button class="chip" onclick="ca('reset')">Forgot password</button></div><div class="mu">Use the email you were invited with.</div>`);
+ if(!c.ok)return h(`<div class="mu">Signed in as ${esc(c.email)}. Open the verification link we emailed you (check spam), then tap the button.</div><br><div class="chips"><button class="chip on" onclick="FB.refresh().catch(e=>alert(msg(e)))">I have verified</button><button class="chip" onclick="FB.resend().then(()=>toast('Sent'))">Resend email</button><button class="chip" onclick="FB.out()">Sign out</button></div>`);
+ const own=z.owner==c.email;
+ const body=z.cid?`<div class="mu">This trip is shared. Members can add entries.</div>${(z.members||[]).map((m,i)=>`<div class="li"><span>${esc(m)}${m==z.owner?' <span class="mu">owner</span>':''}</span>${own&&m!=z.owner?`<button class="x" onclick="mDel(${i})">✕</button>`:''}</div>`).join('')}${own?`<div class="two" style="grid-template-columns:1fr auto;margin-top:8px"><input id="me" type="email" placeholder="Invite by email"><button class="btn sm" onclick="mAdd()">Add</button></div><div class="mu" style="margin-top:6px">They install the app, create an account with that email, verify it, and the trip appears.</div>`:''}`:`<button class="btn" onclick="sh()">Share this trip</button><div class="mu" style="margin-top:6px">Uploads this trip so people you invite can add entries.</div>`;
+ return h(`<div class="mu">Signed in as ${esc(c.email)}</div>${body}<div class="chips" style="margin-top:10px"><button class="chip" onclick="FB.out()">Sign out</button></div>`)}
+async function ca(k){const e=($('#ce').value||'').trim().toLowerCase(),p=$('#cp').value;if(!e)return alert('Enter your email');
+ try{if(k=='reset'){await FB.reset(e);return alert('Password reset email sent. Check your inbox.')}
+  if(!p)return alert('Enter your password');
+  if(k=='signup'){await FB.signup(e,p);alert('Account created. Open the verification link we emailed you, then come back and tap I have verified.')}else await FB.login(e,p)}catch(x){alert(msg(x))}}
+async function sh(){if(!confirm('Upload this trip to the cloud?'))return;try{await FB.share(Z());toast('Shared');tab('set')}catch(x){alert(msg(x))}}
+async function mAdd(){const e=$('#me').value.trim().toLowerCase();if(!e.includes('@'))return;try{await FB.mem(Z().cid,e,1);$('#me').value=''}catch(x){alert(msg(x))}}
+async function mDel(i){const z=Z();if(confirm('Remove '+z.members[i]+' from this trip?'))try{await FB.mem(z.cid,z.members[i],0)}catch(x){alert(msg(x))}}
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 tab();
+</script>
+<script type="module">
+const U='https://www.gstatic.com/firebasejs/10.12.2/';
+try{
+const cfg=(await import('./config.js')).default;if(!cfg.apiKey)throw 0;
+const [{initializeApp},A,F]=await Promise.all([import(U+'firebase-app.js'),import(U+'firebase-auth.js'),import(U+'firebase-firestore.js')]);
+const app=initializeApp(cfg),au=A.getAuth(app),db=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})});
+const subs={};let top=null;
+const sub=cid=>{if(subs[cid])return;subs[cid]=['tx','w'].map(k=>F.onSnapshot(F.collection(db,'trips',cid,k),s=>cloud.col(cid,k,s.docs.map(d=>d.data()))))};
+const stop=()=>{Object.values(subs).flat().forEach(u=>u());for(const k in subs)delete subs[k];if(top)top();top=null};
+const go=u=>{stop();if(!u||!u.emailVerified)return;top=F.onSnapshot(F.query(F.collection(db,'trips'),F.where('members','array-contains',u.email)),s=>s.docChanges().forEach(c=>{const id=c.doc.id;if(c.type=='removed'){(subs[id]||[]).forEach(x=>x());delete subs[id];cloud.gone(id)}else{cloud.trip(id,c.doc.data());sub(id)}}),e=>toast('Sync error: '+e.code))};
+A.onAuthStateChanged(au,u=>{window.CU=u?{email:u.email,ok:u.emailVerified}:null;go(u);cloud.auth()});
+const meta=z=>({name:z.name,base:z.base,start:z.start||'',end:z.end||'',budget:z.budget||0,bp:z.bp||[],st:z.st||{},pr:z.pr||{},ppl:z.ppl||[]});
+const ref=(c,k,i)=>F.doc(db,'trips',c,k,String(i));
+window.FB={
+ login:(e,p)=>A.signInWithEmailAndPassword(au,e,p),
+ signup:async(e,p)=>{const c=await A.createUserWithEmailAndPassword(au,e,p);await A.sendEmailVerification(c.user)},
+ resend:()=>A.sendEmailVerification(au.currentUser),
+ reset:e=>A.sendPasswordResetEmail(au,e),
+ out:()=>A.signOut(au),
+ refresh:async()=>{await A.reload(au.currentUser);await au.currentUser.getIdToken(true);const u=au.currentUser;window.CU={email:u.email,ok:u.emailVerified};go(u);cloud.auth()},
+ set:(c,k,o)=>F.setDoc(ref(c,k,o.id),o),
+ del:(c,k,i)=>F.deleteDoc(ref(c,k,i)),
+ meta:z=>F.setDoc(F.doc(db,'trips',z.cid),meta(z),{merge:true}),
+ mem:(c,e,add)=>F.updateDoc(F.doc(db,'trips',c),{members:add?F.arrayUnion(e):F.arrayRemove(e)}),
+ kill:c=>F.deleteDoc(F.doc(db,'trips',c)),
+ share:async z=>{const me=au.currentUser.email,r=F.doc(F.collection(db,'trips'));z.cid=r.id;z.owner=me;z.members=[me];
+  try{await F.setDoc(r,{...meta(z),owner:me,members:[me]});
+   const all=[...z.tx.map(o=>['tx',o]),...z.w.map(o=>['w',o])];
+   for(let i=0;i<all.length;i+=400){const b=F.writeBatch(db);all.slice(i,i+400).forEach(([k,o])=>b.set(ref(r.id,k,o.id),o));await b.commit()}
+   save()}catch(e){delete z.cid;throw e}}
+};
+}catch(e){window.FB=null}
+cloud.auth();
 </script></body></html>
