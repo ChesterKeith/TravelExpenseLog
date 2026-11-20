@@ -248,7 +248,7 @@ var cloud={
  draw(){const a=document.activeElement;if(a&&a.matches&&a.matches('input,select'))return;tab()},
  auth(){if(T=='set')cloud.draw()}};
 const okc=()=>{const z=Z();if(!z.cid||(window.CU&&CU.ok))return true;alert('This is a shared trip. Sign in under Setup > Cloud sync first.');return false};
-const msg=x=>({'auth/invalid-credential':'Wrong email or password','auth/email-already-in-use':'That email already has an account: use Sign in','auth/weak-password':'Use at least 6 characters','auth/invalid-email':'Invalid email','auth/network-request-failed':'No internet connection','permission-denied':'Not allowed. Check the Firestore rules and that you are a member.'}[x.code]||x.code||'Something went wrong');
+const msg=x=>({'auth/invalid-credential':'Wrong email or password','auth/email-already-in-use':'That email already has an account: use Sign in','auth/weak-password':'Use at least 6 characters','auth/invalid-email':'Invalid email','auth/network-request-failed':'No internet connection','permission-denied':'Not allowed. If you just verified your email, sign out and sign in again. Otherwise check the Firestore rules and that you are a member.'}[x.code]||x.code||'Something went wrong');
 const cw=(k,o)=>{const z=Z();if(z.cid)FB.set(z.cid,k,o).catch(e=>alert(msg(e)))};
 const cd=(k,i)=>{const z=Z();if(z.cid)FB.del(z.cid,k,i).catch(e=>alert(msg(e)))};
 function vCloud(){const z=Z(),c=window.CU,h=t=>`<div class="card"><h3>Cloud sync</h3>${t}</div>`;
@@ -280,7 +280,7 @@ const subs={};let top=null;
 const sub=cid=>{if(subs[cid])return;subs[cid]=['tx','w'].map(k=>F.onSnapshot(F.collection(db,'trips',cid,k),s=>cloud.col(cid,k,s.docs.map(d=>d.data()))))};
 const stop=()=>{Object.values(subs).flat().forEach(u=>u());for(const k in subs)delete subs[k];if(top)top();top=null};
 const go=u=>{stop();if(!u||!u.emailVerified)return;top=F.onSnapshot(F.query(F.collection(db,'trips'),F.where('members','array-contains',u.email)),s=>s.docChanges().forEach(c=>{const id=c.doc.id;if(c.type=='removed'){(subs[id]||[]).forEach(x=>x());delete subs[id];cloud.gone(id)}else{cloud.trip(id,c.doc.data());sub(id)}}),e=>toast('Sync error: '+e.code))};
-A.onAuthStateChanged(au,u=>{window.CU=u?{email:u.email,ok:u.emailVerified}:null;go(u);cloud.auth()});
+A.onAuthStateChanged(au,async u=>{if(u&&u.emailVerified){try{await u.getIdToken(true)}catch(e){}}window.CU=u?{email:u.email,ok:u.emailVerified}:null;go(u);cloud.auth()});
 const meta=z=>({name:z.name,base:z.base,start:z.start||'',end:z.end||'',budget:z.budget||0,bp:z.bp||[],st:z.st||{},pr:z.pr||{},ppl:z.ppl||[]});
 const ref=(c,k,i)=>F.doc(db,'trips',c,k,String(i));
 window.FB={
@@ -295,7 +295,7 @@ window.FB={
  meta:z=>F.setDoc(F.doc(db,'trips',z.cid),meta(z),{merge:true}),
  mem:(c,e,add)=>F.updateDoc(F.doc(db,'trips',c),{members:add?F.arrayUnion(e):F.arrayRemove(e)}),
  kill:c=>F.deleteDoc(F.doc(db,'trips',c)),
- share:async z=>{const me=au.currentUser.email,r=F.doc(F.collection(db,'trips'));z.cid=r.id;z.owner=me;z.members=[me];
+ share:async z=>{await au.currentUser.getIdToken(true);const me=au.currentUser.email,r=F.doc(F.collection(db,'trips'));z.cid=r.id;z.owner=me;z.members=[me];
   try{await F.setDoc(r,{...meta(z),owner:me,members:[me]});
    const all=[...z.tx.map(o=>['tx',o]),...z.w.map(o=>['w',o])];
    for(let i=0;i<all.length;i+=400){const b=F.writeBatch(db);all.slice(i,i+400).forEach(([k,o])=>b.set(ref(r.id,k,o.id),o));await b.commit()}
