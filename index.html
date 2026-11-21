@@ -81,10 +81,25 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stro
 .it{cursor:pointer}
 #t{z-index:40}
 textarea{font:inherit;color:var(--tx);display:block;width:100%;margin-top:4px;padding:12px;border:0;background:var(--bg);border-radius:12px;resize:vertical}
+@keyframes up{from{transform:translateY(36px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.ov.an{animation:fade .18s}.ov.an .sheet{animation:up .24s ease-out}
+button,.it,.mr,.tl,.tile{transition:transform .1s,opacity .1s}
+button:active,.it:active,.mr:active,.tl:active{transform:scale(.97);opacity:.88}
+body{font-variant-numeric:tabular-nums}
+.tile{background:var(--cd);border-radius:16px;box-shadow:var(--sh);padding:12px}
+.tile b{font-size:17px}
+.eb{display:inline-flex;width:26px;height:26px;border-radius:50%;align-items:center;justify-content:center;font-size:14px;margin-right:6px;vertical-align:middle}
+.av{display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#14202b;margin-right:4px;vertical-align:middle}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}.strip .chip{white-space:nowrap;flex:none}
+.g{scroll-margin-top:112px}.tdy{box-shadow:0 0 0 2px var(--ac),var(--sh)}
+.dlg{align-items:center;z-index:50}.dl{border-radius:20px;max-width:340px;margin:0 20px;padding:20px}.dl p{margin:0 0 14px}
+#t{max-width:90vw;text-align:center}#t.s{pointer-events:auto}
+.un{background:none;border:0;color:var(--ac);font-weight:700;margin-left:10px}
 </style></head><body>
 <header id="h"></header><main id="v"></main>
-<nav><button data-t="log" onclick="tab('log')"><i><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></i><small>Log</small></button><button data-t="list" onclick="tab('list')"><i><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></i><small>List</small></button><button data-t="plan" onclick="tab('plan')"><i><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg></i><small>Plan</small></button><button data-t="rep" onclick="tab('rep')"><i><svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-12"/></svg></i><small>Report</small></button><button data-t="set" onclick="tab('set')"><i><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></i><small>Setup</small></button></nav>
-<div id="sh"></div><div id="t"></div>
+<nav><button data-t="home" onclick="tab('home')"><i><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6"/></svg></i><small>Home</small></button><button data-t="log" onclick="tab('log')"><i><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></i><small>Log</small></button><button data-t="list" onclick="tab('list')"><i><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></i><small>List</small></button><button data-t="plan" onclick="tab('plan')"><i><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg></i><small>Plan</small></button><button data-t="rep" onclick="tab('rep')"><i><svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-12"/></svg></i><small>Report</small></button></nav>
+<div id="sh"></div><div id="dg"></div><div id="t"></div>
 <script>
 const $=s=>document.querySelector(s),K='tl1';
 const mk=(name,base)=>({id:Date.now(),name,base,w:[],tx:[],budget:0,bp:[],start:'',end:'',pr:{},st:{}});
@@ -103,23 +118,37 @@ const dd=(x,y)=>Math.round((new Date(y)-new Date(x))/864e5);
 const cu=()=>[...new Set([B(),...Z().w.map(x=>x.cur)])];
 const rate0=c=>{let p=0,q=0;Z().w.forEach(x=>{if(x.cur==c){p+=x.php;q+=x.fc}});return q?p/q:null};
 const rate=c=>c==B()?1:((Z().lock||{})[c]||rate0(c));
-const toast=m=>{const e=$('#t');e.textContent=m;e.classList.add('s');setTimeout(()=>e.classList.remove('s'),1200)};
-let T=S.owner?'log':'set',L=null,RV='cat',SH=null,LD=null;
+const toast=m=>snack(m);
+window.alert=m=>snack(String(m),null,5000);
+let SNT;
+function snack(m,u,ms){const e=$('#t');e.innerHTML=esc(m)+(u?' <button class="un" onclick="UN()">Undo</button>':'');window.UN=()=>{clearTimeout(SNT);e.classList.remove('s');if(u)u()};e.classList.add('s');if(m=='Saved'&&navigator.vibrate)navigator.vibrate(15);clearTimeout(SNT);SNT=setTimeout(()=>e.classList.remove('s'),ms||(u?5000:1800))}
+function ask(m,ok){return new Promise(r=>{const d=$('#dg');d.innerHTML=`<div class="ov dlg an"><div class="sheet dl"><p>${esc(m)}</p><div class="two"><button class="btn" style="background:var(--bar);color:var(--ac2)" id="dn">Cancel</button><button class="btn" id="dy">${esc(ok||'OK')}</button></div></div></div>`;$('#dn').onclick=()=>{d.innerHTML='';r(false)};$('#dy').onclick=()=>{d.innerHTML='';r(true)}})}
+function askIn(m,v){return new Promise(r=>{const d=$('#dg');d.innerHTML=`<div class="ov dlg an"><div class="sheet dl"><b>${esc(m)}</b><input id="di" value="${esc(v||'')}" style="margin:10px 0 14px"><div class="two"><button class="btn" style="background:var(--bar);color:var(--ac2)" id="dn">Cancel</button><button class="btn" id="dy">OK</button></div></div></div>`;const i=$('#di');i.focus();$('#dn').onclick=()=>{d.innerHTML='';r(null)};$('#dy').onclick=()=>{const x=i.value;d.innerHTML='';r(x)}})}
+const I=(d,w=18)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px">${d}</svg>`;
+const IC={x:I('<path d="M6 6l12 12M18 6L6 18"/>'),moon:I('<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',20),sun:I('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',20),pin:I('<path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/>',16),atm:I('<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',16),gear:I('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',22)};
+const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+let T=S.owner?'home':'set',L=null,RV='cat',SH=null,LD=null,PT='',TG='';
 const th=()=>{const d=S.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=d;document.querySelector('meta[name=theme-color]').content=d=='dark'?'#1d272c':'#ffffff';return d};
 function tg(){S.theme=th()=='dark'?'light':'dark';save();tab()}
 const CE={Food:'🍜',Drink:'🧋','Major Transpo':'✈️','Minor Transpo':'🛺',Activities:'🎡',Shopping:'🛍️',Grocery:'🛒',Accommodation:'🏨',Pasabuy:'📦',Other:'✨'};
 const ce=c=>(S.ce&&S.ce[c])||CE[c]||'🏷️';
+const cc=c=>PC[[...String(c)].reduce((q,x)=>q+x.charCodeAt(0),0)%PC.length];
+const ceb=c=>`<span class="eb" style="background:${cc(c)}33">${ce(c)}</span>`;
+const av=n=>`<span class="av" style="background:${cc(n)}">${esc([...String(n)][0]||'?').toUpperCase()}</span>`;
 const PC=['#ff8f95','#61c0bf','#f9c784','#a3d9b1','#b8a9e8','#8cc7f0','#f4a6d7','#d9c27a','#7fb7a4','#e59866'];
 const newL=()=>({k:'e',date:today(),det:'',amt:'',m:S.last.m,c:S.last.c||B(),cat:S.cats[0],by:S.owner,p:[...S.last.p],mode:'eq',ex:{},wl:'',wb:'',wc:'',wp:'',wf:''});
-function tab(t){T=t||T;if(!L)L=newL();th();
- $('#h').innerHTML=`<div class="hb"><svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#61c0bf"/><path d="M11.4 14v-2.5a4.6 4.6 0 0 1 9.2 0V14" fill="none" stroke="#fae3d9" stroke-width="1.3" stroke-linecap="round"/><rect x="8.6" y="13.4" width="14.8" height="9.6" rx="2.2" fill="#fae3d9"/><circle cx="16" cy="17.3" r="1.75" fill="#ff8f95"/><path d="M14.4 18.1 16 21.3l1.6-3.2z" fill="#ff8f95"/><circle cx="16" cy="17.3" r=".65" fill="#fae3d9"/></svg><div><b>Wanderpurse</b><small>budget · split · forex</small></div><button class="x" onclick="tg()">${th()=='dark'?'☀️':'🌙'}</button></div><div class="ht"><select onchange="S.cur=+this.value;L=null;save();tab()">${S.trips.map(x=>`<option value="${x.id}" ${x.id==S.cur?'selected':''}>${x.cid?'☁ ':''}${esc(x.name)}</option>`).join('')}</select><button class="x" onclick="nt()">＋</button><span class="mu" id="sy">${syn()}</span></div>`;
- $('#v').innerHTML={log:vLog,list:vList,plan:vPlan,rep:vRep,set:vSet}[T]();
+function tab(t){T=t||T;const pt=PT;PT=T;if(!L)L=newL();th();
+ $('#h').innerHTML=`<div class="hb"><svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#61c0bf"/><path d="M11.4 14v-2.5a4.6 4.6 0 0 1 9.2 0V14" fill="none" stroke="#fae3d9" stroke-width="1.3" stroke-linecap="round"/><rect x="8.6" y="13.4" width="14.8" height="9.6" rx="2.2" fill="#fae3d9"/><circle cx="16" cy="17.3" r="1.75" fill="#ff8f95"/><path d="M14.4 18.1 16 21.3l1.6-3.2z" fill="#ff8f95"/><circle cx="16" cy="17.3" r=".65" fill="#fae3d9"/></svg><div><b>Wanderpurse</b><small>budget · split · forex</small></div><button class="x" onclick="tg()">${th()=='dark'?IC.sun:IC.moon}</button><button class="x" style="margin-left:4px" onclick="tab('set')">${IC.gear}</button></div><div class="ht"><select onchange="S.cur=+this.value;L=null;save();tab()">${S.trips.map(x=>`<option value="${x.id}" ${x.id==S.cur?'selected':''}>${esc(x.name)}${x.cid?' · shared':''}</option>`).join('')}</select><button class="x" onclick="nt()">＋</button><span class="mu" id="sy">${syn()}</span></div>`;
+ $('#v').innerHTML=(S.owner?{home:vHome,log:vLog,list:vList,plan:vPlan,rep:vRep,set:vSet}[T]:vOb)();$('nav').style.display=S.owner?'':'none';
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==T));
- const sc=$('#sh .sheet'),y=sc?sc.scrollTop:0;$('#sh').innerHTML=shHTML();const n=$('#sh .sheet');if(n)n.scrollTop=y;document.body.style.overflow=SH?'hidden':'';upd()}
-function nt(){const n=prompt('New trip name');if(!n)return;const t=mk(n,B());t.bp=S.owner?[S.owner]:[];S.trips.push(t);S.cur=t.id;L=null;save();tab('set')}
-function dt(){const z=Z();if(S.trips.length<2)return alert('Keep at least one trip');
- if(z.cid){if(!(window.CU&&CU.ok&&z.owner==CU.email))return alert('Only the trip owner can delete a shared trip.');if(!confirm('Delete this trip for everyone?'))return;FB.kill(z.cid).catch(e=>alert(msg(e)))}
- else if(!confirm('Delete this trip and all its entries?'))return;
+ const sc=$('#sh .sheet'),y=sc?sc.scrollTop:0;$('#sh').innerHTML=shHTML();const n=$('#sh .sheet');if(n)n.scrollTop=y;document.body.style.overflow=SH?'hidden':'';if(n&&!sc){const o=$('#sh .ov');if(o)o.classList.add('an')}
+ if(T=='log'&&pt!='log'&&!SH){const a=$('#amt');if(a)a.focus()}
+ if(T=='plan'&&pt!='plan'&&TG){const e=$('#d-'+TG);if(e)e.scrollIntoView()}
+ upd()}
+async function nt(){const n=await askIn('New trip name');if(!n)return;const t=mk(n,B());t.bp=S.owner?[S.owner]:[];S.trips.push(t);S.cur=t.id;L=null;save();tab('set')}
+async function dt(){const z=Z();if(S.trips.length<2)return alert('Keep at least one trip');
+ if(z.cid){if(!(window.CU&&CU.ok&&z.owner==CU.email))return alert('Only the trip owner can delete a shared trip.');if(!(await ask('Delete this trip for everyone? This cannot be undone.','Delete')))return;FB.kill(z.cid).catch(e=>alert(msg(e)))}
+ else if(!(await ask('Delete this trip and all its entries? This cannot be undone.','Delete')))return;
  S.trips=S.trips.filter(t=>t.id!=z.id);S.cur=S.trips[0].id;L=null;SH=null;save();tab()}
 function upd(){const e=$('#rem');if(!e)return;const a=+L.amt||0,k=L.p.length;
  if(L.mode=='eq'){e.textContent=k&&a?'Each: '+f(a/k):'';e.style.color=''}
@@ -128,9 +157,9 @@ function vLog(){
  if(!S.owner)return'<div class="card">Add your name in <b>Setup</b> first.</div>';
  const z=Z();L.p=L.p.filter(p=>S.people.includes(p));if(!S.people.includes(L.by))L.by=S.owner;if(!cu().includes(L.c))L.c=B();
  const o=(a,v)=>a.map(x=>`<option ${x==v?'selected':''}>${esc(x)}</option>`).join('');
- const kd=`<div class="chips"><button class="chip ${L.k=='e'?'on':''}" onclick="L.k='e';tab()">🧾 Expense</button><button class="chip ${L.k=='w'?'on':''}" onclick="L.k='w';tab()">🏧 Withdrawal</button></div>`;
+ const kd=`<div class="chips"><button class="chip ${L.k=='e'?'on':''}" onclick="L.k='e';tab()">Expense</button><button class="chip ${L.k=='w'?'on':''}" onclick="L.k='w';tab()">Withdrawal</button></div>`;
  if(L.k=='w')return`<div class="card">${L.eid?'':kd}
-<label>Date<input type="date" value="${L.date}" oninput="L.date=this.value"></label>
+<label>Date<input type="date" value="${L.date}" oninput="L.date=this.value"></label><div class="chips" style="margin-top:-4px"><button class="chip ${L.date==today()?'on':''}" onclick="L.date=today();tab()">Today</button><button class="chip ${L.date==ago(1)?'on':''}" onclick="L.date=ago(1);tab()">Yesterday</button></div>
 <label>Label<input value="${esc(L.wl)}" placeholder="e.g. ATM at airport" oninput="L.wl=this.value"></label>
 <label>Withdrawn by<select onchange="L.wb=this.value">${o(S.people,L.wb||S.owner)}</select></label>
 <label>Foreign currency<input value="${esc(L.wc)}" placeholder="e.g. JPY" list="cl" oninput="L.wc=this.value"></label>
@@ -139,15 +168,15 @@ function vLog(){
 <label>Foreign cash received<input type="number" inputmode="decimal" step="any" value="${esc(L.wf)}" oninput="L.wf=this.value"></label></div>
 <div class="mu">This sets the rate for this trip: total ${esc(B())} paid ÷ total foreign cash received.</div><br>
 <button class="btn" onclick="addW()">${L.eid?'Save changes':'Save withdrawal'}</button>${L.eid?`<button class="btn" style="margin-top:10px;background:none;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)" onclick="delW(${L.eid})">Delete withdrawal</button>`:''}</div>`;
- const own=true,cash=L.m=='cash';
+ const own=true,cash=L.m=='cash',seen={},rec=[];[...z.tx].sort((a,b)=>b.id-a.id).forEach(t=>{const k=t.det.toLowerCase();if(!seen[k]&&rec.length<6){seen[k]=1;rec.push(t)}});
  const mc=[['debit',S.acc.debit],['credit',S.acc.credit],['cash','Cash']].map(([k,n])=>`<button class="chip ${L.m==k?'on':''}" onclick="L.m='${k}';tab()">${esc(n)}</button>`).join('');
- const pc=S.people.map((p,i)=>`<button class="chip ${L.p.includes(p)?'on':''}" onclick="tp(${i})">${esc(p)}</button>`).join('');
+ const pc=S.people.map((p,i)=>`<button class="chip ${L.p.includes(p)?'on':''}" onclick="tp(${i})">${av(p)}${esc(p)}</button>`).join('');
  const gc=S.groups.map((g,i)=>`<button class="chip" onclick="gp(${i})">${esc(g.n)}</button>`).join('');
  const ex=L.mode=='ex'?L.p.map(p=>{const i=S.people.indexOf(p);return`<label>${esc(p)}<input type="number" inputmode="decimal" step="any" value="${esc(L.ex[p]||'')}" oninput="L.ex[S.people[${i}]]=this.value;upd()"></label>`}).join(''):'';
  return`<div class="card">${L.eid?'':kd}
-<label>Date<input type="date" value="${L.date}" oninput="L.date=this.value"></label>
-<label>Details<input value="${esc(L.det)}" placeholder="e.g. Banh mi" oninput="L.det=this.value"></label>
-<div class="two"><label>Amount<input type="number" inputmode="decimal" step="any" value="${esc(L.amt)}" oninput="L.amt=this.value;upd()"></label>
+<label>Date<input type="date" value="${L.date}" oninput="L.date=this.value"></label><div class="chips" style="margin-top:-4px"><button class="chip ${L.date==today()?'on':''}" onclick="L.date=today();tab()">Today</button><button class="chip ${L.date==ago(1)?'on':''}" onclick="L.date=ago(1);tab()">Yesterday</button></div>
+${L.eid||!rec.length?'':`<div class="mu">Recent</div><div class="chips">${rec.map(t=>`<button class="chip" onclick="rc(${t.id})">${ce(t.cat)} ${esc(t.det)}</button>`).join('')}</div>`}<label>Details<input value="${esc(L.det)}" placeholder="e.g. Banh mi" oninput="L.det=this.value"></label>
+<div class="two"><label>Amount<input id="amt" type="number" inputmode="decimal" step="any" value="${esc(L.amt)}" oninput="L.amt=this.value;upd()"></label>
 <label>Currency<select ${cash?'':'disabled'} onchange="L.c=this.value">${o(cu(),cash?L.c:B())}</select></label></div>
 <label>Paid by<select onchange="L.by=this.value;tab()">${o(S.people,L.by)}</select></label>
 ${own?`<div class="mu">Paid with</div><div class="chips">${mc}</div>`:''}${L.m!='cash'?`<div class="chips"><button class="chip ${L.pend?'on':''}" onclick="L.pend=!L.pend;tab()">Pending: not posted yet</button></div>`:''}
@@ -158,7 +187,7 @@ ${own?`<div class="mu">Paid with</div><div class="chips">${mc}</div>`:''}${L.m!=
 ${ex}<div class="mu" id="rem"></div><br><button class="btn" onclick="add()">${L.eid?'Save changes':'Save'}</button>${L.eid?`<button class="btn" style="margin-top:10px;background:var(--bar);color:var(--ac2)" onclick="dup(${L.eid})">Duplicate to a new entry</button><button class="btn" style="margin-top:10px;background:none;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)" onclick="del(${L.eid})">Delete entry</button>`:''}</div>`}
 function tp(i){const p=S.people[i],j=L.p.indexOf(p);j<0?L.p.push(p):L.p.splice(j,1);tab()}
 function gp(i){L.p=S.groups[i].p.filter(p=>S.people.includes(p));tab()}
-function sg(){const n=prompt('Group name');if(n&&L.p.length){S.groups.push({n,p:[...L.p]});save();tab()}}
+async function sg(){const n=await askIn('Group name');if(n&&L.p.length){S.groups.push({n,p:[...L.p]});save();tab()}}
 function add(){if(!okc())return;
  const a=+L.amt;if(!(a>0))return alert('Enter an amount');
  if(!L.p.length)return alert('Pick who shares this');
@@ -185,23 +214,56 @@ let F={q:'',cat:'',p:'',m:''};
 const ft=t=>(!F.cat||t.cat==F.cat)&&(!F.p||t.by==F.p||t.sh.some(x=>x.p==F.p))&&(!F.m||(F.m=='pend'?t.pend:t.m==F.m))&&(!F.q||[t.det,t.cat,t.by,...t.sh.map(x=>x.p)].join(' ').toLowerCase().includes(F.q.toLowerCase()));
 const rl=()=>{const e=$('#lb');if(e)e.innerHTML=lbody()};
 function vList(){const o=(a,v,all)=>`<option value="">${all}</option>`+a.map(c=>`<option value="${esc(c)}" ${c==v?'selected':''}>${esc(c)}</option>`).join('');
- return`<div class="card"><input type="search" placeholder="Search entries" value="${esc(F.q)}" oninput="F.q=this.value;rl()"><div class="two" style="margin-top:8px;grid-template-columns:1fr 1fr 1fr"><select onchange="F.cat=this.value;rl()">${o(S.cats,F.cat,'Category')}</select><select onchange="F.p=this.value;rl()">${o(S.people,F.p,'Person')}</select><select onchange="F.m=this.value;rl()"><option value="">Payment</option>${[['debit','Debit'],['credit','Credit'],['cash','Cash'],['pend','Pending']].map(([k,n])=>`<option value="${k}" ${F.m==k?'selected':''}>${n}</option>`).join('')}</select></div></div><div id="lb">${lbody()}</div>`}
+ return`<div class="card"><input type="search" placeholder="Search entries" value="${esc(F.q)}" oninput="F.q=this.value;rl()"><div class="two" style="margin-top:8px;grid-template-columns:1fr 1fr 1fr"><select onchange="F.cat=this.value;rl()">${o(S.cats,F.cat,'Category')}</select><select onchange="F.p=this.value;rl()">${o(S.people,F.p,'Person')}</select><select onchange="F.m=this.value;rl()"><option value="">Payment</option>${[['debit','Debit'],['credit','Credit'],['cash','Cash'],['pend','Pending']].map(([k,n])=>`<option value="${k}" ${F.m==k?'selected':''}>${n}</option>`).join('')}</select></div><div class="mu" style="margin-top:8px">Tap to edit · swipe right to duplicate · swipe left to delete</div></div><div id="lb">${lbody()}</div>`}
 function lbody(){
  const z=Z(),b=esc(B()),a=agg();
  const fa=F.cat||F.p||F.m,it=[...z.tx.filter(ft).map(t=>({...t,k:'e'})),...(fa?[]:z.w.filter(w=>!F.q||(w.label||'').toLowerCase().includes(F.q.toLowerCase()))).map(w=>({...w,k:'w'}))].sort((x,y)=>y.date.localeCompare(x.date)||y.id-x.id);
  const dt={},cum={};z.tx.forEach(t=>dt[t.date]=(dt[t.date]||0)+t.amt*(rate(t.cur)||0));
  const ds=[...new Set(it.map(t=>t.date))].sort();let run=0;[...new Set([...z.tx,...z.w].map(t=>t.date))].sort().forEach(d=>{run+=dt[d]||0;cum[d]=run});
- const row=t=>{if(t.k=='w')return`<div class="it" onclick="ew(${t.id})"><div><b>🏧 ${esc(t.label||'Withdrawal')}</b><div class="mu">${esc(t.who||S.owner)} · 1 ${esc(t.cur)} = ${(t.php/t.fc).toFixed(4)} ${b}</div></div><div class="r"><b>${f(t.fc)} ${esc(t.cur)}</b><div class="mu">${f(t.php)} ${b}</div></div></div>`;
-  const r=rate(t.cur)||0;return`<div class="it" onclick="eo(${t.id})"><div><b>${ce(t.cat)} ${esc(t.det)}</b><div class="mu">${esc(t.cat)} · ${esc(ml(t))}${t.pend?' · <span style="color:var(--bad)">Pending</span>':''}${Z().cid&&t.u?' · '+esc(t.u):''}</div><div class="mu">${t.sh.map(x=>esc(x.p)+' '+f(x.a)).join(' · ')}</div></div><div class="r"><b>${f(t.amt)} ${esc(t.cur)}</b>${t.cur!=B()?`<div class="mu">${f(t.amt*r)} ${b}</div>`:''}</div></div>`};
+ const row=t=>{if(t.k=='w')return`<div class="it" data-sw="${t.id}" data-k="w" onclick="ew(${t.id})"><div><b>${IC.atm} ${esc(t.label||'Withdrawal')}</b><div class="mu">${esc(t.who||S.owner)} · 1 ${esc(t.cur)} = ${(t.php/t.fc).toFixed(4)} ${b}</div></div><div class="r"><b>${f(t.fc)} ${esc(t.cur)}</b><div class="mu">${f(t.php)} ${b}</div></div></div>`;
+  const r=rate(t.cur)||0;return`<div class="it" data-sw="${t.id}" data-k="e" onclick="eo(${t.id})"><div><b>${ceb(t.cat)} ${esc(t.det)}</b><div class="mu">${esc(t.cat)} · ${esc(ml(t))}${t.pend?' · <span style="color:var(--bad)">Pending</span>':''}${Z().cid&&t.u?' · '+esc(t.u):''}</div><div class="mu">${t.sh.map(x=>av(x.p)+esc(x.p)+' '+f(x.a)).join(' · ')}</div></div><div class="r"><b>${f(t.amt)} ${esc(t.cur)}</b>${t.cur!=B()?`<div class="mu">${f(t.amt*r)} ${b}</div>`:''}</div></div>`};
  let h=`<div class="card"><div class="mu">Total paid</div><b>${f(a.tot)} ${b}</b><div class="mu" style="margin-top:6px">${Object.entries(a.per).map(([p,v])=>esc(p)+' '+f(v)).join(' · ')}</div>${F.q||fa?`<div class="mu" style="margin-top:6px">Showing ${it.filter(t=>t.k=='e').length} of ${z.tx.length} entries · ${f(it.filter(t=>t.k=='e').reduce((s,t)=>s+t.amt*(rate(t.cur)||0),0))} ${b}</div>`:''}</div>`;
  ds.slice().reverse().forEach(d=>{const e=it.filter(t=>t.date==d);
   h+=`<div class="g"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'})}<small>${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} ${e.length==1?'entry':'entries'}</small></span><span style="text-align:right">${f(dt[d]||0)} ${b}<small>Trip total ${f(cum[d])} ${b}</small></span></div>${e.map(row).join('')}</div>`});
  return h+(it.length?'':'<div class="mu">No entries yet.</div>')}
-function del(id){if(!okc())return;if(confirm('Delete this entry?')){Z().tx=Z().tx.filter(t=>t.id!=id);cd('tx',id);save();cl()}}
+function del(id){if(!okc())return;const z=Z(),t=z.tx.find(x=>x.id==id);if(!t)return;z.tx=z.tx.filter(x=>x.id!=id);cd('tx',id);save();cl();snack('Entry deleted',()=>{z.tx.push(t);if(z.cid)FB.set(z.cid,'tx',t).catch(()=>{});save();tab()})}
 function delW(id){if(!okc())return;const z=Z(),n=z.w.filter(x=>x.id!=id);
  if(z.tx.some(t=>t.cur!=z.base&&!n.some(x=>x.cur==t.cur)))return alert('Entries still use that currency, so the withdrawal stays');
- if(confirm('Delete this withdrawal?')){z.w=n;cd('w',id);save();cl()}}
+ {const w=z.w.find(x=>x.id==id);z.w=n;cd('w',id);save();cl();snack('Withdrawal deleted',()=>{z.w.push(w);if(z.cid)FB.set(z.cid,'w',w).catch(()=>{});save();tab()})}}
 function tb(i){const z=Z(),p=S.people[i],j=z.bp.indexOf(p);j<0?z.bp.push(p):z.bp.splice(j,1);save();tab()}
+function rc(id){const t=Z().tx.find(x=>x.id==id);if(!t)return;Object.assign(L,{det:t.det,cat:t.cat,m:t.m,c:t.cur,by:t.by,p:t.sh.map(x=>x.p),mode:'eq',pend:false});tab();const a=$('#amt');if(a)a.focus()}
+function gd(d){const e=$('#d-'+d);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}
+function vHome(){const z=Z(),b=esc(B()),a=agg(),td=today();
+ const bs=z.tx.reduce((s,t)=>{if(t.cat=='Pasabuy')return s;const r=rate(t.cur)||0;return s+t.sh.reduce((q,x)=>q+(z.bp.includes(x.p)?x.a*r:0),0)},0);
+ const t0=z.start||z.tx.map(t=>t.date).sort()[0]||td,el=Math.max(1,dd(t0,td)+1),rem=z.end?Math.max(1,dd(td,z.end)+1):0,left=z.budget-bs,pr=z.budget?bs/z.budget:0;
+ const col=pr>1?'var(--bad)':pr>.75?'#f2b24c':'var(--ac)';
+ const lab=z.start&&td<z.start?'Starts in '+dd(td,z.start)+' days':z.end&&td>z.end?'Trip ended':z.start?'Day '+el+(z.end?' of '+(dd(z.start,z.end)+1):''):'';
+ const tile=(l,v,sb)=>`<div class="tile"><div class="mu">${l}</div><b>${v}</b>${sb?`<div class="mu">${sb}</div>`:''}</div>`;
+ const ring=`<svg viewBox="0 0 42 42" width="124" height="124"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--bar)" stroke-width="4"/><circle cx="21" cy="21" r="15.9155" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${Math.min(100,pr*100)} 100" transform="rotate(-90 21 21)"/><text x="21" y="22" text-anchor="middle" font-size="7" font-weight="700" fill="var(--tx)">${z.budget?Math.round(pr*100)+'%':'-'}</text><text x="21" y="27" text-anchor="middle" font-size="3" fill="var(--mu)">${z.budget?'of budget':'no budget'}</text></svg>`;
+ const cash=cu().filter(c=>c!=B()).map(c=>{const g=z.w.filter(w=>w.cur==c&&(w.who||S.owner)==S.owner).reduce((q,w)=>q+w.fc,0),sp=z.tx.filter(t=>t.cur==c&&t.by==S.owner&&t.m=='cash').reduce((q,t)=>q+t.amt,0);return g||sp?tile(esc(c)+' cash left',f(g-sp),'withdrawn '+f(g)):''}).join('');
+ const now=new Date().toTimeString().slice(0,5),nx=(z.it||[]).filter(x=>x.date>td||(x.date==td&&(x.time||'99')>=now)).sort((x,y)=>x.date.localeCompare(y.date)||(x.time||'99').localeCompare(y.time||'99'))[0];
+ return`<div class="card"><div class="mu">${lab}</div><h2 style="margin:2px 0 8px">${esc(z.name)}</h2><div style="display:flex;align-items:center;gap:14px">${ring}<div style="flex:1"><div class="mu">Spent (budget group)</div><b style="font-size:20px">${f(bs)} ${b}</b>${z.budget?`<div class="mu">${left>=0?f(left)+' left of '+f(z.budget):'Over by '+f(-left)}</div>${rem&&left>0?`<div class="mu">${f(left/rem)} per day to go</div>`:''}`:`<div style="margin-top:6px"><button class="chip" onclick="tab('rep')">Set a budget in Report</button></div>`}</div></div></div>
+<div class="two" style="margin-bottom:12px">${tile('Today',f(a.day[td]||0)+' '+b,'all entries')}${tile('Daily average',f(bs/el)+' '+b,'budget group')}</div>
+${cash?`<div class="two" style="margin-bottom:12px">${cash}</div>`:''}
+${nx?`<div class="card" onclick="tab('plan')" style="cursor:pointer"><div class="mu">Next stop</div><b>${ceb(nx.cat)} ${esc(nx.title)}</b><div class="mu">${new Date(nx.date+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}${nx.time?' · '+esc(nx.time):''}${nx.place?' · '+esc(nx.place):''}</div></div>`:''}
+<div class="two"><button class="btn" onclick="tab('log')">Add expense</button><button class="btn" style="background:var(--bar);color:var(--ac2)" onclick="L=newL();L.k='w';tab('log')">Add withdrawal</button></div>`}
+let OBS=0,OBD={n:'',t:'',b:'PHP',p:[]};
+function vOb(){const s=OBS,dots=[0,1,2].map(i=>`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i<=s?'var(--ac)':'var(--ln)'}"></span>`).join('');
+ const bk=(n)=>`<div class="chips" style="margin-top:12px"><button class="chip" onclick="OBS=${n};tab()">Back</button></div>`;
+ const b=[`<h2 style="margin:6px 0">Welcome to Wanderpurse</h2><div class="mu">Track trip spending, split costs and plan your days. What should we call you?</div><label style="margin-top:14px">Your name<input value="${esc(OBD.n)}" oninput="OBD.n=this.value"></label><button class="btn" onclick="obn()">Next</button><div class="chips" style="margin-top:12px"><button class="chip" onclick="obj()">I was invited to a trip</button></div>`,
+ `<h2 style="margin:6px 0">Your first trip</h2><label>Trip name<input value="${esc(OBD.t)}" placeholder="e.g. Vietnam trip 2026" oninput="OBD.t=this.value"></label><label>Home currency<input value="${esc(OBD.b)}" oninput="OBD.b=this.value.toUpperCase()"></label><button class="btn" onclick="obn()">Next</button>${bk(0)}`,
+ `<h2 style="margin:6px 0">Who is travelling?</h2><div class="mu">${esc(OBD.n)} is already in. Add the others, you can change this later.</div><div class="chips" style="margin-top:10px">${OBD.p.map(x=>`<span class="chip on">${esc(x)}</span>`).join('')}</div><div class="two" style="grid-template-columns:1fr auto"><input id="o3" placeholder="Add a person"><button class="btn sm" onclick="obp()">Add</button></div><button class="btn" style="margin-top:14px" onclick="obn()">Start</button>${bk(1)}`][s];
+ return`<div class="card" style="margin-top:12px"><div style="text-align:center;margin-bottom:10px">${dots}</div>${b}</div>`}
+function obp(){const v=$('#o3').value.trim();if(v&&!OBD.p.includes(v)&&v!=OBD.n)OBD.p.push(v);tab()}
+function obn(){if(OBS==0){if(!OBD.n.trim())return alert('Enter your name');OBS=1;return tab()}
+ if(OBS==1){OBS=2;return tab()}
+ const n=OBD.n.trim(),z=Z();S.owner=n;S.people=[n,...OBD.p];z.bp=[n];if(OBD.t.trim())z.name=OBD.t.trim();z.base=(OBD.b||'PHP').trim().toUpperCase();save();T='home';L=null;tab()}
+function obj(){const n=OBD.n.trim();if(!n)return alert('Enter your name first');S.owner=n;S.people=[n];Z().bp=[n];save();SH='cloud';T='set';tab()}
+var SWD=0;
+(()=>{let x0,y0,el,dx;const m=$('#v');
+ m.addEventListener('touchstart',e=>{el=e.target.closest('.it[data-sw]');if(!el)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0},{passive:true});
+ m.addEventListener('touchmove',e=>{if(!el)return;dx=e.touches[0].clientX-x0;if(Math.abs(e.touches[0].clientY-y0)>40){el.style.transform='';el.style.background='';el=null;return}el.style.transform=`translateX(${dx}px)`;el.style.background=dx<0?'rgba(220,60,50,.18)':'rgba(97,192,191,.25)'},{passive:true});
+ m.addEventListener('touchend',()=>{if(!el)return;const e=el,d=dx;el=null;e.style.transform='';e.style.background='';if(Math.abs(d)>100){SWD=Date.now();const id=+e.dataset.sw,k=e.dataset.k;if(d<0)(k=='e'?del:delW)(id);else if(k=='e')dup(id)}})})();
 let P=null,PD='';
 const newP=()=>({date:PD||Z().start||today(),time:'',title:'',place:'',note:'',url:'',cat:S.cats.includes('Activities')?'Activities':S.cats[0],est:''});
 const mp=x=>x.url||(x.place?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(x.place):'');
@@ -209,8 +271,10 @@ function vPlan(){
  const z=Z(),b=esc(B()),it=z.it||[],tot=it.reduce((s,x)=>s+(+x.est||0),0),ds={};
  it.forEach(x=>(ds[x.date]=ds[x.date]||[]).push(x));
  let h=`<div class="card"><div class="two"><div><div class="mu">Estimated total</div><b>${f(tot)} ${b}</b></div><div><div class="mu">${z.budget?'Budget':'Stops'}</div><b>${z.budget?f(z.budget)+' '+b:it.length}</b></div></div>${z.budget?`<div class="mu" style="margin-top:6px">${tot<=z.budget?'Within budget by '+f(z.budget-tot):'Over budget by '+f(tot-z.budget)} ${b}</div>`:''}</div>`;
- Object.keys(ds).sort().forEach(d=>{const e=ds[d].sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')),sb=e.reduce((s,x)=>s+(+x.est||0),0);
-  h+=`<div class="g"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}<small>${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} stop${e.length==1?'':'s'}</small></span><span>${f(sb)} ${b}</span></div>${e.map(x=>{const m=mp(x);return`<div class="tl" onclick="ei(${x.id})"><div class="t">${esc(x.time||'')}</div><div class="b"><b>${ce(x.cat)} ${esc(x.title)}</b>${x.place?`<div class="mu">${esc(x.place)}</div>`:''}${x.note?`<div class="mu" style="font-style:italic">${esc(x.note)}</div>`:''}${m?`<a class="chip" style="display:inline-block;margin-top:6px;text-decoration:none" href="${esc(m)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📍 Open in Maps</a>`:''}</div><div class="r"><b>${x.est?f(x.est):''}</b></div></div>`}).join('')}</div>`});
+ const td=today(),dk=Object.keys(ds).sort();TG=dk.find(d=>d>=td)||'';
+ if(dk.length)h+=`<div class="strip">${dk.map(d=>`<button class="chip${d==td?' on':''}" onclick="gd('${d}')">${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}</button>`).join('')}</div>`;
+ dk.forEach(d=>{const e=ds[d].sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')),sb=e.reduce((s,x)=>s+(+x.est||0),0);
+  h+=`<div class="g${d==td?' tdy':''}" id="d-${d}"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}<small>${d==td?'Today · ':''}${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} stop${e.length==1?'':'s'}</small></span><span>${f(sb)} ${b}</span></div>${e.map(x=>{const m=mp(x);return`<div class="tl" onclick="ei(${x.id})"><div class="t">${esc(x.time||'')}</div><div class="b"><b>${ceb(x.cat)} ${esc(x.title)}</b>${x.place?`<div class="mu">${esc(x.place)}</div>`:''}${x.note?`<div class="mu" style="font-style:italic">${esc(x.note)}</div>`:''}${m?`<a class="chip" style="display:inline-block;margin-top:6px;text-decoration:none" href="${esc(m)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${IC.pin} Open in Maps</a>`:''}</div><div class="r"><b>${x.est?f(x.est):''}</b></div></div>`}).join('')}</div>`});
  return h+(it.length?'':'<div class="card mu">No stops yet. Tap + to add the first one.</div>')+`<button class="fab" onclick="P=newP();SH='stop';tab()">+</button>`}
 function pForm(){const b=esc(B());
  const o=(a,v)=>a.map(c=>`<option value="${esc(c)}" ${c==v?'selected':''}>${ce(c)} ${esc(c)}</option>`).join('');
@@ -225,7 +289,7 @@ function addI(){if(!okc())return;if(!P.title.trim())return alert('Enter what or 
  const z=Z();z.it=z.it||[];const o={id:P.id||Date.now(),date:P.date,time:P.time||'',title:P.title.trim(),place:(P.place||'').trim(),note:(P.note||'').trim(),url:(P.url||'').trim(),cat:P.cat,est:+P.est||0};
  const i=z.it.findIndex(x=>x.id==o.id);i<0?z.it.push(o):z.it[i]=o;cw('it',o);PD=o.date;save();cl();toast('Saved')}
 function ei(id){const x=Z().it.find(v=>v.id==id);if(!x)return;P={...x,note:x.note||'',est:x.est||''};SH='stop';tab()}
-function di(id){if(!okc())return;if(confirm('Delete this stop?')){Z().it=Z().it.filter(x=>x.id!=id);cd('it',id);save();cl()}}
+function di(id){if(!okc())return;const z=Z(),o=(z.it||[]).find(x=>x.id==id);if(!o)return;z.it=z.it.filter(x=>x.id!=id);cd('it',id);save();cl();snack('Stop deleted',()=>{z.it.push(o);if(z.cid)FB.set(z.cid,'it',o).catch(()=>{});save();tab()})}
 function vRep(){
  const z=Z(),a=agg(),b=esc(B());
  if(!z.tx.length)return'<div class="card mu">No entries yet.</div>';
@@ -233,8 +297,8 @@ function vRep(){
  const t0=z.start||z.tx.map(t=>t.date).sort()[0],td=today(),el=Math.max(1,dd(t0,td)+1),rem=z.end?Math.max(1,dd(td,z.end)+1):0,left=z.budget-bs;
  const rw=(l,v,s,p)=>`<div class="li" ${p!=null?`style="background:linear-gradient(90deg,var(--bar) ${p}%,transparent ${p}%)"`:''}><span>${l}${s?`<div class="mu">${s}</div>`:''}</span><b>${v}</b></div>`;
  const tot=o=>Object.values(o).reduce((s,v)=>s+v,0)||1;
- const list=(o,em)=>Object.entries(o).sort((x,y)=>y[1]-x[1]).map(([k,v],i)=>rw(`<span class="dot" style="background:${PC[i%PC.length]}"></span>${em?em(k)+' ':''}${esc(k)}`,f(v)+' '+b,(v/tot(o)*100).toFixed(1)+'%')).join('');
- const pie=o=>{let c=0;return`<svg class="pie" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--bar)" stroke-width="7"/>${Object.entries(o).sort((x,y)=>y[1]-x[1]).map(([k,v],i)=>{const p=v/tot(o)*100,e=`<circle cx="21" cy="21" r="15.9155" fill="none" stroke="${PC[i%PC.length]}" stroke-width="7" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${25-c}"/>`;c+=p;return e}).join('')}<text x="21" y="20.6" text-anchor="middle" font-size="3.4" font-weight="700" fill="var(--tx)">${f(tot(o))}</text><text x="21" y="25" text-anchor="middle" font-size="2.6" fill="var(--mu)">${b}</text></svg>`};
+ const list=(o,em)=>Object.entries(o).sort((x,y)=>y[1]-x[1]).map(([k,v],i)=>rw(`<span class="dot" style="background:${em?cc(k):PC[i%PC.length]}"></span>${em?em(k)+' ':''}${esc(k)}`,f(v)+' '+b,(v/tot(o)*100).toFixed(1)+'%')).join('');
+ const pie=(o,ct)=>{let c=0;return`<svg class="pie" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--bar)" stroke-width="7"/>${Object.entries(o).sort((x,y)=>y[1]-x[1]).map(([k,v],i)=>{const p=v/tot(o)*100,e=`<circle cx="21" cy="21" r="15.9155" fill="none" stroke="${ct?cc(k):PC[i%PC.length]}" stroke-width="7" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${25-c}"/>`;c+=p;return e}).join('')}<text x="21" y="20.6" text-anchor="middle" font-size="3.4" font-weight="700" fill="var(--tx)">${f(tot(o))}</text><text x="21" y="25" text-anchor="middle" font-size="2.6" fill="var(--mu)">${b}</text></svg>`};
  const ps=[...new Set([...Object.keys(a.per),...Object.keys(a.paid)])];
  let h=`<div class="card"><h3>Budget</h3><label>Budget (${b})<input type="number" inputmode="decimal" value="${z.budget||''}" onchange="Z().budget=+this.value||0;save();tab()"></label>
 <div class="mu">Counts the shares of (pasabuy not included)</div><div class="chips">${S.people.map((p,i)=>`<button class="chip ${z.bp.includes(p)?'on':''}" onclick="tb(${i})">${esc(p)}</button>`).join('')}</div>
@@ -243,7 +307,7 @@ ${rw('Spent',f(bs)+' '+b)}${z.budget?rw('Left',f(left)+' '+b):''}${rw('Average p
  const cb=z.cb||{};
  h+=`<div class="card"><h3>Category budgets</h3>${Object.keys(cb).map(c=>{const sp=bc[c]||0,l=cb[c];return rw(`${ce(c)} ${esc(c)}`,`${f(sp)} / ${f(l)} ${b}`,sp>l?`<span style="color:var(--bad)">Over by ${f(sp-l)}</span>`:`${f(l-sp)} left`,Math.min(100,sp/l*100))}).join('')||'<div class="mu">No category limits yet.</div>'}<div class="chips" style="margin-top:10px"><button class="chip" onclick="op('cbud')">Set limits</button></div></div>`;
  h+=`<div class="card"><h3>Per person</h3>${ps.map(p=>{const s=a.per[p]||0,pd=a.paid[p]||0,n=pd-s,i=S.people.indexOf(p);
-  return rw(esc(p),f(s)+' '+b,`Paid ${f(pd)} · ${Math.abs(n)<.005?'even':n>0?'is owed '+f(n):'owes '+f(-n)}`+(p!=S.owner&&i>=0?` · <label style="display:inline;margin:0"><input type="checkbox" style="display:inline;width:auto" ${z.st[p]?'checked':''} onchange="Z().st[S.people[${i}]]=this.checked;save()"> settled</label>`:''))}).join('')}</div>`;
+  return rw(av(p)+esc(p),f(s)+' '+b,`Paid ${f(pd)} · ${Math.abs(n)<.005?'even':n>0?'is owed '+f(n):'owes '+f(-n)}`+(p!=S.owner&&i>=0?` · <label style="display:inline;margin:0"><input type="checkbox" style="display:inline;width:auto" ${z.st[p]?'checked':''} onchange="Z().st[S.people[${i}]]=this.checked;save()"> settled</label>`:''))}).join('')}</div>`;
  const pt=z.tx.filter(t=>t.cat=='Pasabuy');
  if(pt.length){const by={};pt.forEach(t=>{const r=rate(t.cur)||0;t.sh.forEach(x=>{if(x.p!=t.by)by[x.p]=(by[x.p]||0)+x.a*r})});
   const ch=Object.values(by).reduce((s,v)=>s+v,0),rc=Object.entries(by).reduce((s,[p,v])=>s+(z.pr[p]?v:0),0);
@@ -254,7 +318,7 @@ ${Object.entries(by).map(([p,v])=>{const i=S.people.indexOf(p);return rw(esc(p),
  const es={};(z.it||[]).forEach(x=>{if(x.est)es[x.cat]=(es[x.cat]||0)+x.est});
  if(Object.keys(es).length){const et=Object.values(es).reduce((s,v)=>s+v,0);h+=`<div class="card"><h3>Plan vs actual</h3>${Object.keys(es).map(c=>rw(`${ce(c)} ${esc(c)}`,`${f(a.cat[c]||0)} / ${f(es[c])} ${b}`,((a.cat[c]||0)/es[c]*100).toFixed(0)+'% of estimate')).join('')}${rw('All spending',`${f(a.tot)} / ${f(et)} ${b}`,'actual / estimated from the itinerary')}</div>`}
  const src={cat:[a.cat,ce],per:[a.per,null],pay:[a.pay,null]}[RV];
- h+=`<div class="card"><h3>Spending breakdown</h3><div class="chips">${[['cat','Category'],['per','Person'],['pay','Payment']].map(([k,n])=>`<button class="chip ${RV==k?'on':''}" onclick="RV='${k}';tab()">${n}</button>`).join('')}</div>${pie(src[0])}${list(src[0],src[1])}</div>`;
+ h+=`<div class="card"><h3>Spending breakdown</h3><div class="chips">${[['cat','Category'],['per','Person'],['pay','Payment']].map(([k,n])=>`<button class="chip ${RV==k?'on':''}" onclick="RV='${k}';tab()">${n}</button>`).join('')}</div>${pie(src[0],RV=='cat')}${list(src[0],src[1])}</div>`;
  h+=`<div class="card"><h3>By day</h3>${Object.entries(a.day).sort().map(([d,v])=>rw(d,f(v)+' '+b)).join('')}</div>`;
  return h}
 function setOwner(v){v=v.trim();if(!v)return;const o=S.owner;
@@ -265,10 +329,10 @@ function addP(){const v=$('#np').value.trim();if(v&&!S.people.includes(v)){S.peo
 function rmP(i){const p=S.people[i];if(p==S.owner)return alert('That is you');if(S.trips.some(t=>t.tx.some(x=>x.by==p||x.sh.some(y=>y.p==p))))return alert('Used in entries, so it stays to keep totals correct');S.people.splice(i,1);save();tab('set')}
 function rmG(i){S.groups.splice(i,1);save();tab('set')}
 function addC(){let v=$('#nc').value.trim(),e='';const m=v.match(/^(\p{Extended_Pictographic}\S*)\s+(.+)$/u);if(m){e=m[1];v=m[2]}if(v&&!S.cats.includes(v)){S.cats.push(v);if(e)S.ce[v]=e;save();tab('set')}}
-function ee(i){const c=S.cats[i],e=prompt('Emoji for '+c,ce(c));if(e){S.ce[c]=e.trim();save();tab('set')}}
+async function ee(i){const c=S.cats[i],e=await askIn('Emoji for '+c,ce(c));if(e){S.ce[c]=e.trim();save();tab('set')}}
 function rmC(i){const c=S.cats[i];if(S.trips.some(t=>t.tx.some(x=>x.cat==c)))return alert('Used in entries, so it stays');S.cats.splice(i,1);save();tab('set')}
 function bk(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='trip-ledger-backup.json';a.click()}
-function rst(el){if(!el.files[0]||!confirm('Replace everything in the app with this backup?'))return;const r=new FileReader();r.onload=()=>{try{S={...D,...JSON.parse(r.result)};save();L=null;tab('set')}catch(e){alert('Not a valid backup file')}};r.readAsText(el.files[0])}
+async function rst(el){if(!el.files[0]||!(await ask('Replace everything in the app with this backup?','Replace')))return;const r=new FileReader();r.onload=()=>{try{S={...D,...JSON.parse(r.result)};save();L=null;tab('set')}catch(e){alert('Not a valid backup file')}};r.readAsText(el.files[0])}
 function vSet(){const z=Z(),c=window.CU;
  const row=(k,t,sm)=>`<div class="mr" onclick="op('${k}')"><span><b>${t}</b><div class="mu">${sm}</div></span><span class="mu">›</span></div>`;
  return`${S.owner?'':'<div class="card">Start here: open <b>You & your cards</b> below and enter your name.</div>'}
@@ -279,15 +343,15 @@ const op=k=>{SH=k;tab()};
 function cl(){SH=null;if(LD){L=LD;LD=null}P=null;tab()}
 const fromTx=t=>{const v=t.sh.map(x=>x.a),eq=Math.max(...v)-Math.min(...v)<.005;return{...newL(),k:'e',date:t.date,det:t.det,amt:String(t.amt),m:t.m,c:t.cur,cat:t.cat,by:t.by,p:t.sh.map(x=>x.p),mode:eq?'eq':'ex',ex:Object.fromEntries(t.sh.map(x=>[x.p,String(x.a)])),pend:!!t.pend,eid:t.id}};
 const fromW=w=>({...newL(),k:'w',date:w.date,wl:w.label||'',wb:w.who||S.owner,wc:w.cur,wp:String(w.php),wf:String(w.fc),eid:w.id});
-function eo(id){const t=Z().tx.find(x=>x.id==id);if(!t)return;if(!LD)LD=L;L=fromTx(t);SH='tx';tab()}
-function ew(id){const w=Z().w.find(x=>x.id==id);if(!w)return;if(!LD)LD=L;L=fromW(w);SH='wd';tab()}
+function eo(id){if(Date.now()-SWD<500)return;const t=Z().tx.find(x=>x.id==id);if(!t)return;if(!LD)LD=L;L=fromTx(t);SH='tx';tab()}
+function ew(id){if(Date.now()-SWD<500)return;const w=Z().w.find(x=>x.id==id);if(!w)return;if(!LD)LD=L;L=fromW(w);SH='wd';tab()}
 function shHTML(){if(!SH)return'';let t,c;
  if(SH=='tx'||SH=='wd'){t=SH=='tx'?'Edit entry':'Edit withdrawal';c=vLog()}
  else if(SH=='stop'){if(!P)P=newP();t=P.id?'Edit stop':'Add a stop';c=pForm()}
  else[t,c]=sbody(SH);
- return`<div class="ov" onclick="cl()"><div class="sheet" onclick="event.stopPropagation()"><div class="shh"><b>${t}</b><button class="x" onclick="cl()">✕</button></div>${c}</div></div>`}
+ return`<div class="ov" onclick="cl()"><div class="sheet" onclick="event.stopPropagation()"><div class="shh"><b>${t}</b><button class="x" onclick="cl()">${IC.x}</button></div>${c}</div></div>`}
 function sbody(k){const z=Z(),b=esc(z.base),c=window.CU,own=!z.cid||(c&&c.ok&&z.owner==c.email);
- const li=(a,fn)=>a.map((x,i)=>`<div class="li"><span>${esc(x)}</span><button class="x" onclick="${fn}(${i})">✕</button></div>`).join('');
+ const li=(a,fn)=>a.map((x,i)=>`<div class="li"><span>${esc(x)}</span><button class="x" onclick="${fn}(${i})">${IC.x}</button></div>`).join('');
  const ad=(id,ph,fn)=>`<div class="two" style="grid-template-columns:1fr auto;margin-top:8px"><input id="${id}" placeholder="${ph}"><button class="btn sm" onclick="${fn}()">Add</button></div>`;
  if(k=='trip')return['Trip',`<label>Trip name<input value="${esc(z.name)}" onchange="Z().name=this.value;save();tab()"></label>
 <div class="two"><label>Start<input type="date" value="${z.start||''}" onchange="Z().start=this.value;save();tab()"></label><label>End<input type="date" value="${z.end||''}" onchange="Z().end=this.value;save();tab()"></label></div>
@@ -295,13 +359,13 @@ function sbody(k){const z=Z(),b=esc(z.base),c=window.CU,own=!z.cid||(c&&c.ok&&z.
 <button class="btn" onclick="nt()">+ Create a new trip</button>
 ${own?`<button class="btn" style="margin-top:10px;background:none;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)" onclick="dt()">Delete this trip</button>`:'<div class="mu" style="margin-top:10px">Only the person who created this trip can delete it.</div>'}`];
  if(k=='cloud')return['Cloud sync',vCloud()];
- if(k=='cur'){const lkd=z.lock&&Object.keys(z.lock).length,cr=cu().filter(x=>x!=z.base).map(x=>`<div class="li"><span>${lkd&&z.lock[x]?'🔒 ':''}${esc(x)}</span><span class="mu">1 ${esc(x)} = ${(rate(x)||0).toFixed(4)} ${b} · ${z.w.filter(v=>v.cur==x).length} withdrawal(s)</span></div>`).join('')||'<div class="mu" style="margin-top:8px">Log a withdrawal (Log tab) to add a foreign currency.</div>';
+ if(k=='cur'){const lkd=z.lock&&Object.keys(z.lock).length,cr=cu().filter(x=>x!=z.base).map(x=>`<div class="li"><span>${lkd&&z.lock[x]?'Locked · ':''}${esc(x)}</span><span class="mu">1 ${esc(x)} = ${(rate(x)||0).toFixed(4)} ${b} · ${z.w.filter(v=>v.cur==x).length} withdrawal(s)</span></div>`).join('')||'<div class="mu" style="margin-top:8px">Log a withdrawal (Log tab) to add a foreign currency.</div>';
   return['Currencies (this trip)',`<div class="li"><span>${b}</span><span class="mu">home currency</span></div>${cr}${cu().length>1?(own?`<button class="btn" style="margin-top:12px" onclick="lk(${lkd?0:1})">${lkd?'Unlock rates':'Lock rates'}</button><div class="mu" style="margin-top:6px">${lkd?'Rates are frozen. New withdrawals no longer change them.':'Freezes the current average rates so they stop changing after the trip.'}</div>`:'<div class="mu" style="margin-top:8px">Only the trip creator can lock rates.</div>'):''}`]}
  if(k=='cbud')return['Category budgets ('+z.base+')',S.cats.filter(x=>x!='Pasabuy').map(x=>`<label>${ce(x)} ${esc(x)}<input type="number" inputmode="decimal" step="any" value="${(z.cb||{})[x]||''}" onchange="setCb(${S.cats.indexOf(x)},this.value)"></label>`).join('')+'<div class="mu">Counts the shares of the people ticked in the main budget. Pasabuy is excluded.</div>'];
  if(k=='me')return['You & your cards',`<label>Your name<input value="${esc(S.owner)}" onchange="setOwner(this.value)"></label><div class="two"><label>Debit card<input value="${esc(S.acc.debit)}" onchange="S.acc.debit=this.value;save()"></label><label>Credit card<input value="${esc(S.acc.credit)}" onchange="S.acc.credit=this.value;save()"></label></div>`];
  if(k=='ppl')return['People',li(S.people,'rmP')+ad('np','Add person','addP')];
  if(k=='grp')return['Saved groups',li(S.groups.map(g=>g.n+' ('+g.p.length+')'),'rmG')||'<div class="mu">Save a group from the Log screen.</div>'];
- if(k=='cat')return['Categories',S.cats.map((x,i)=>`<div class="li"><span><a onclick="ee(${i})">${ce(x)}</a> ${esc(x)}</span><button class="x" onclick="rmC(${i})">✕</button></div>`).join('')+ad('nc','🎫 Add category','addC')+'<div class="mu" style="margin-top:6px">Tip: start with an emoji, e.g. 🎫 Tickets. Tap an emoji in the list to change it.</div>'];
+ if(k=='cat')return['Categories',S.cats.map((x,i)=>`<div class="li"><span><a onclick="ee(${i})">${ce(x)}</a> ${esc(x)}</span><button class="x" onclick="rmC(${i})">${IC.x}</button></div>`).join('')+ad('nc','Add category','addC')+'<div class="mu" style="margin-top:6px">Tip: start with an emoji, e.g. 🎫 Tickets. Tap an emoji in the list to change it.</div>'];
  return['Backup & export',`<button class="btn" onclick="xp()">Export to Excel (.xlsx)</button><div class="mu" style="margin:6px 0 14px">Saved to your phone in the same layout as your spreadsheet.</div><div class="mu">Your data lives on this phone. Download a backup now and then.</div><br><button class="btn sm" onclick="bk()">Download backup</button><label class="btn sm" style="display:inline-block;color:var(--on);margin:0 0 0 8px">Restore<input type="file" accept=".json" hidden onchange="rst(this)"></label>`]}
 var SYN={};
 function syn(){const z=Z();if(!z.cid)return'';if(!navigator.onLine)return'Offline · saved on phone';const v=Object.entries(SYN).filter(([k])=>k.startsWith(z.cid));if(v.some(([,x])=>x.p))return'Syncing…';return v.length&&v.every(([,x])=>x.c)?'Connecting…':'Synced ✓'}
@@ -350,18 +414,18 @@ function vCloud(){const z=Z(),c=window.CU,h=t=>`<div>${t}</div>`;
  if(!c)return h(`<label>Email<input id="ce" type="email" autocomplete="username"></label><label>Password<input id="cp" type="password" autocomplete="current-password"></label><button class="btn" onclick="ca('login')">Sign in</button><div class="chips" style="margin-top:10px"><button class="chip" onclick="ca('signup')">Create account</button><button class="chip" onclick="ca('reset')">Forgot password</button></div><div class="mu">Use the email you were invited with.</div>`);
  if(!c.ok)return h(`<div class="mu">Signed in as ${esc(c.email)}. Open the verification link we emailed you (check spam), then tap the button.</div><br><div class="chips"><button class="chip on" onclick="FB.refresh().catch(e=>alert(msg(e)))">I have verified</button><button class="chip" onclick="FB.resend().then(()=>toast('Sent'))">Resend email</button><button class="chip" onclick="FB.out()">Sign out</button></div>`);
  const own=z.owner==c.email;
- const body=z.cid?`<div class="mu">This trip is shared. Members can add entries.</div>${(z.members||[]).map((m,i)=>`<div class="li"><span>${esc(m)}${m==z.owner?' <span class="mu">owner</span>':''}</span>${own&&m!=z.owner?`<span><button class="chip" onclick="inv(Z().members[${i}])">Invite</button><button class="x" onclick="mDel(${i})">✕</button></span>`:''}</div>`).join('')}${own?`<div class="two" style="grid-template-columns:1fr auto;margin-top:8px"><input id="me" type="email" placeholder="Invite by email"><button class="btn sm" onclick="mAdd()">Add</button></div><div class="mu" style="margin-top:6px">Adding an email only gives access. Tap Invite next to it to send them the link and steps.</div>`:''}`:`<button class="btn" onclick="sh()">Share this trip</button><div class="mu" style="margin-top:6px">Uploads this trip so people you invite can add entries.</div>`;
+ const body=z.cid?`<div class="mu">This trip is shared. Members can add entries.</div>${(z.members||[]).map((m,i)=>`<div class="li"><span>${esc(m)}${m==z.owner?' <span class="mu">owner</span>':''}</span>${own&&m!=z.owner?`<span><button class="chip" onclick="inv(Z().members[${i}])">Invite</button><button class="x" onclick="mDel(${i})">${IC.x}</button></span>`:''}</div>`).join('')}${own?`<div class="two" style="grid-template-columns:1fr auto;margin-top:8px"><input id="me" type="email" placeholder="Invite by email"><button class="btn sm" onclick="mAdd()">Add</button></div><div class="mu" style="margin-top:6px">Adding an email only gives access. Tap Invite next to it to send them the link and steps.</div>`:''}`:`<button class="btn" onclick="sh()">Share this trip</button><div class="mu" style="margin-top:6px">Uploads this trip so people you invite can add entries.</div>`;
  return h(`<div class="mu">Signed in as ${esc(c.email)}</div>${body}<div class="chips" style="margin-top:10px"><button class="chip" onclick="FB.out()">Sign out</button></div>`)}
 async function ca(k){const e=($('#ce').value||'').trim().toLowerCase(),p=$('#cp').value;if(!e)return alert('Enter your email');
  try{if(k=='reset'){await FB.reset(e);return alert('Password reset email sent. Check your inbox.')}
   if(!p)return alert('Enter your password');
   if(k=='signup'){await FB.signup(e,p);alert('Account created. Open the verification link we emailed you, then come back and tap I have verified.')}else await FB.login(e,p)}catch(x){alert(msg(x))}}
-async function sh(){if(!confirm('Upload this trip to the cloud?'))return;try{await FB.share(Z());toast('Shared');tab('set')}catch(x){alert(msg(x))}}
+async function sh(){if(!(await ask('Upload this trip to the cloud so invited people can add entries?','Upload')))return;try{await FB.share(Z());toast('Shared');tab('set')}catch(x){alert(msg(x))}}
 async function mAdd(){const e=$('#me').value.trim().toLowerCase();if(!e.includes('@'))return;try{await FB.mem(Z().cid,e,1);$('#me').value='';toast('Added. Tap Invite to send them the link')}catch(x){alert(msg(x))}}
 async function inv(e){const u=location.href.split('#')[0].replace(/index\.html$/,'');
  const t=`You're invited to the trip "${Z().name}" on Wanderpurse, our trip expense tracker.\n\n1. Open ${u} and install it to your home screen\n2. Setup: enter your name\n3. Cloud sync: create an account with ${e} (use exactly this email), then verify it from your inbox\n4. Tap "I have verified" and the trip will appear.`;
  try{if(navigator.share)await navigator.share({title:'Wanderpurse invite',text:t});else{await navigator.clipboard.writeText(t);toast('Invite copied')}}catch(x){}}
-async function mDel(i){const z=Z();if(confirm('Remove '+z.members[i]+' from this trip?'))try{await FB.mem(z.cid,z.members[i],0)}catch(x){alert(msg(x))}}
+async function mDel(i){const z=Z();if(await ask('Remove '+z.members[i]+' from this trip?','Remove'))try{await FB.mem(z.cid,z.members[i],0)}catch(x){alert(msg(x))}}
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 tab();
