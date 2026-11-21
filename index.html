@@ -68,10 +68,23 @@ nav button{opacity:1;font-size:inherit;padding:8px 0 10px}
 nav i{width:60px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center}
 nav .on i{background:var(--bar)}
 nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--cd);width:100%;max-width:640px;max-height:90vh;overflow:auto;border-radius:22px 22px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+.shh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:17px}
+.sheet .card{box-shadow:none;padding:0;margin:0;background:none}
+.fab{position:fixed;right:18px;bottom:calc(88px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:18px;border:0;background:var(--ac);color:var(--on);font-size:30px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:10}
+.tl{display:flex;gap:10px;padding:12px;border-top:1px solid var(--ln);cursor:pointer}
+.tl .t{width:44px;text-align:right;font-weight:600;font-size:13px;color:var(--ac2)}
+.tl .b{flex:1;min-width:0;border-left:2px solid var(--ac);padding-left:12px}
+.mr{display:flex;align-items:center;gap:8px;padding:14px 4px;border-top:1px solid var(--ln);cursor:pointer}
+.mr>span:first-child{flex:1}
+.it{cursor:pointer}
+#t{z-index:40}
+textarea{font:inherit;color:var(--tx);display:block;width:100%;margin-top:4px;padding:12px;border:0;background:var(--bg);border-radius:12px;resize:vertical}
 </style></head><body>
 <header id="h"></header><main id="v"></main>
 <nav><button data-t="log" onclick="tab('log')"><i><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></i><small>Log</small></button><button data-t="list" onclick="tab('list')"><i><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></i><small>List</small></button><button data-t="plan" onclick="tab('plan')"><i><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg></i><small>Plan</small></button><button data-t="rep" onclick="tab('rep')"><i><svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-12"/></svg></i><small>Report</small></button><button data-t="set" onclick="tab('set')"><i><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></i><small>Setup</small></button></nav>
-<div id="t"></div>
+<div id="sh"></div><div id="t"></div>
 <script>
 const $=s=>document.querySelector(s),K='tl1';
 const mk=(name,base)=>({id:Date.now(),name,base,w:[],tx:[],budget:0,bp:[],start:'',end:'',pr:{},st:{}});
@@ -90,7 +103,7 @@ const dd=(x,y)=>Math.round((new Date(y)-new Date(x))/864e5);
 const cu=()=>[...new Set([B(),...Z().w.map(x=>x.cur)])];
 const rate=c=>{if(c==B())return 1;let p=0,q=0;Z().w.forEach(x=>{if(x.cur==c){p+=x.php;q+=x.fc}});return q?p/q:null};
 const toast=m=>{const e=$('#t');e.textContent=m;e.classList.add('s');setTimeout(()=>e.classList.remove('s'),1200)};
-let T=S.owner?'log':'set',L=null,RV='cat';
+let T=S.owner?'log':'set',L=null,RV='cat',SH=null,LD=null;
 const th=()=>{const d=S.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=d;document.querySelector('meta[name=theme-color]').content=d=='dark'?'#1d272c':'#ffffff';return d};
 function tg(){S.theme=th()=='dark'?'light':'dark';save();tab()}
 const CE={Food:'🍜',Drink:'🧋','Major Transpo':'✈️','Minor Transpo':'🛺',Activities:'🎡',Shopping:'🛍️',Grocery:'🛒',Accommodation:'🏨',Pasabuy:'📦',Other:'✨'};
@@ -100,12 +113,13 @@ const newL=()=>({k:'e',date:today(),det:'',amt:'',m:S.last.m,c:S.last.c||B(),cat
 function tab(t){T=t||T;if(!L)L=newL();th();
  $('#h').innerHTML=`<div class="hb"><svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#61c0bf"/><path d="M11.4 14v-2.5a4.6 4.6 0 0 1 9.2 0V14" fill="none" stroke="#fae3d9" stroke-width="1.3" stroke-linecap="round"/><rect x="8.6" y="13.4" width="14.8" height="9.6" rx="2.2" fill="#fae3d9"/><circle cx="16" cy="17.3" r="1.75" fill="#ff8f95"/><path d="M14.4 18.1 16 21.3l1.6-3.2z" fill="#ff8f95"/><circle cx="16" cy="17.3" r=".65" fill="#fae3d9"/></svg><div><b>Wanderpurse</b><small>budget · split · forex</small></div><button class="x" onclick="tg()">${th()=='dark'?'☀️':'🌙'}</button></div><div class="ht"><select onchange="S.cur=+this.value;L=null;save();tab()">${S.trips.map(x=>`<option value="${x.id}" ${x.id==S.cur?'selected':''}>${x.cid?'☁ ':''}${esc(x.name)}</option>`).join('')}</select><button class="x" onclick="nt()">＋</button></div>`;
  $('#v').innerHTML={log:vLog,list:vList,plan:vPlan,rep:vRep,set:vSet}[T]();
- document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==T));upd()}
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==T));
+ const sc=$('#sh .sheet'),y=sc?sc.scrollTop:0;$('#sh').innerHTML=shHTML();const n=$('#sh .sheet');if(n)n.scrollTop=y;document.body.style.overflow=SH?'hidden':'';upd()}
 function nt(){const n=prompt('New trip name');if(!n)return;const t=mk(n,B());t.bp=S.owner?[S.owner]:[];S.trips.push(t);S.cur=t.id;L=null;save();tab('set')}
 function dt(){const z=Z();if(S.trips.length<2)return alert('Keep at least one trip');
  if(z.cid){if(!(window.CU&&CU.ok&&z.owner==CU.email))return alert('Only the trip owner can delete a shared trip.');if(!confirm('Delete this trip for everyone?'))return;FB.kill(z.cid).catch(e=>alert(msg(e)))}
  else if(!confirm('Delete this trip and all its entries?'))return;
- S.trips=S.trips.filter(t=>t.id!=z.id);S.cur=S.trips[0].id;L=null;save();tab()}
+ S.trips=S.trips.filter(t=>t.id!=z.id);S.cur=S.trips[0].id;L=null;SH=null;save();tab()}
 function upd(){const e=$('#rem');if(!e)return;const a=+L.amt||0,k=L.p.length;
  if(L.mode=='eq'){e.textContent=k&&a?'Each: '+f(a/k):'';e.style.color=''}
  else{const d=Math.round((a-L.p.reduce((t,x)=>t+(+L.ex[x]||0),0))*100)/100;e.textContent=d==0?'Split matches the amount':'Left to assign: '+f(d);e.style.color=d==0?'':'var(--bad)'}}
@@ -114,7 +128,7 @@ function vLog(){
  const z=Z();L.p=L.p.filter(p=>S.people.includes(p));if(!S.people.includes(L.by))L.by=S.owner;if(!cu().includes(L.c))L.c=B();
  const o=(a,v)=>a.map(x=>`<option ${x==v?'selected':''}>${esc(x)}</option>`).join('');
  const kd=`<div class="chips"><button class="chip ${L.k=='e'?'on':''}" onclick="L.k='e';tab()">🧾 Expense</button><button class="chip ${L.k=='w'?'on':''}" onclick="L.k='w';tab()">🏧 Withdrawal</button></div>`;
- if(L.k=='w')return`<div class="card">${kd}
+ if(L.k=='w')return`<div class="card">${L.eid?'':kd}
 <label>Date<input type="date" value="${L.date}" oninput="L.date=this.value"></label>
 <label>Label<input value="${esc(L.wl)}" placeholder="e.g. ATM at airport" oninput="L.wl=this.value"></label>
 <label>Withdrawn by<select onchange="L.wb=this.value">${o(S.people,L.wb||S.owner)}</select></label>
@@ -123,13 +137,13 @@ function vLog(){
 <div class="two"><label>${esc(B())} paid (fees included)<input type="number" inputmode="decimal" step="any" value="${esc(L.wp)}" oninput="L.wp=this.value"></label>
 <label>Foreign cash received<input type="number" inputmode="decimal" step="any" value="${esc(L.wf)}" oninput="L.wf=this.value"></label></div>
 <div class="mu">This sets the rate for this trip: total ${esc(B())} paid ÷ total foreign cash received.</div><br>
-<button class="btn" onclick="addW()">Save withdrawal</button></div>`;
+<button class="btn" onclick="addW()">${L.eid?'Save changes':'Save withdrawal'}</button>${L.eid?`<button class="btn" style="margin-top:10px;background:none;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)" onclick="delW(${L.eid})">Delete withdrawal</button>`:''}</div>`;
  const own=true,cash=L.m=='cash';
  const mc=[['debit',S.acc.debit],['credit',S.acc.credit],['cash','Cash']].map(([k,n])=>`<button class="chip ${L.m==k?'on':''}" onclick="L.m='${k}';tab()">${esc(n)}</button>`).join('');
  const pc=S.people.map((p,i)=>`<button class="chip ${L.p.includes(p)?'on':''}" onclick="tp(${i})">${esc(p)}</button>`).join('');
  const gc=S.groups.map((g,i)=>`<button class="chip" onclick="gp(${i})">${esc(g.n)}</button>`).join('');
  const ex=L.mode=='ex'?L.p.map(p=>{const i=S.people.indexOf(p);return`<label>${esc(p)}<input type="number" inputmode="decimal" step="any" value="${esc(L.ex[p]||'')}" oninput="L.ex[S.people[${i}]]=this.value;upd()"></label>`}).join(''):'';
- return`<div class="card">${kd}
+ return`<div class="card">${L.eid?'':kd}
 <label>Date<input type="date" value="${L.date}" oninput="L.date=this.value"></label>
 <label>Details<input value="${esc(L.det)}" placeholder="e.g. Banh mi" oninput="L.det=this.value"></label>
 <div class="two"><label>Amount<input type="number" inputmode="decimal" step="any" value="${esc(L.amt)}" oninput="L.amt=this.value;upd()"></label>
@@ -140,7 +154,7 @@ ${own?`<div class="mu">Paid with</div><div class="chips">${mc}</div>`:''}
 <div class="mu">Shared by</div><div class="chips">${pc}</div>
 <div class="chips">${gc}<button class="chip" onclick="L.p=[...S.people];tab()">Everyone</button><button class="chip" onclick="sg()">+ Save group</button></div>
 <div class="chips"><button class="chip ${L.mode=='eq'?'on':''}" onclick="L.mode='eq';tab()">Split equally</button><button class="chip ${L.mode=='ex'?'on':''}" onclick="L.mode='ex';tab()">Set amounts</button></div>
-${ex}<div class="mu" id="rem"></div><br><button class="btn" onclick="add()">Save</button></div>`}
+${ex}<div class="mu" id="rem"></div><br><button class="btn" onclick="add()">${L.eid?'Save changes':'Save'}</button>${L.eid?`<button class="btn" style="margin-top:10px;background:none;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)" onclick="del(${L.eid})">Delete entry</button>`:''}</div>`}
 function tp(i){const p=S.people[i],j=L.p.indexOf(p);j<0?L.p.push(p):L.p.splice(j,1);tab()}
 function gp(i){L.p=S.groups[i].p.filter(p=>S.people.includes(p));tab()}
 function sg(){const n=prompt('Group name');if(n&&L.p.length){S.groups.push({n,p:[...L.p]});save();tab()}}
@@ -151,11 +165,13 @@ function add(){if(!okc())return;
  let sh;
  if(L.mode=='eq')sh=L.p.map(p=>({p,a:a/L.p.length}));
  else{sh=L.p.map(p=>({p,a:+L.ex[p]||0}));if(Math.abs(sh.reduce((t,x)=>t+x.a,0)-a)>.005)return alert('The split must add up to the amount')}
- const t={id:Date.now(),date:L.date,det:L.det||L.cat,cat:L.cat,cur,amt:a,by:L.by,m:L.m,sh};Z().tx.push(t);cw('tx',t);
+ const t={id:L.eid||Date.now(),date:L.date,det:L.det||L.cat,cat:L.cat,cur,amt:a,by:L.by,m:L.m,sh},z=Z(),i=z.tx.findIndex(x=>x.id==t.id);i<0?z.tx.push(t):z.tx[i]=t;cw('tx',t);if(L.eid){save();cl();toast('Saved');return}
  S.last={m:L.m,c:L.c,p:L.p};save();const d=L.date;L=newL();L.date=d;tab('log');toast('Saved')}
 function addW(){if(!okc())return;const cur=(L.wc||'').trim().toUpperCase(),php=+L.wp,fc=+L.wf;
  if(!cur||cur==B()||!(php>0)||!(fc>0))return alert(`Enter a foreign currency code (not ${B()}), the ${B()} paid and the foreign cash received`);
- const w={id:Date.now(),date:L.date,label:L.wl,who:L.wb||S.owner,cur,php,fc};Z().w.push(w);cw('w',w);S.last.m='cash';S.last.c=cur;save();const d=L.date;L=newL();L.date=d;tab('log');toast('Saved')}
+ const w={id:L.eid||Date.now(),date:L.date,label:L.wl,who:L.wb||S.owner,cur,php,fc},z=Z(),old=z.w.slice(),i=z.w.findIndex(x=>x.id==w.id);i<0?z.w.push(w):z.w[i]=w;
+ if(z.tx.some(t=>t.cur!=z.base&&rate(t.cur)==null)){z.w=old;return alert('Entries still use the old currency, so it can not be changed')}
+ cw('w',w);if(L.eid){save();cl();toast('Saved');return}S.last.m='cash';S.last.c=cur;save();const d=L.date;L=newL();L.date=d;tab('log');toast('Saved')}
 const ml=t=>(t.by==S.owner?'':t.by+' · ')+(t.m=='debit'?(t.by==S.owner?S.acc.debit:'Debit'):t.m=='credit'?(t.by==S.owner?S.acc.credit:'Credit'):'Cash');
 function agg(){const o={tot:0,per:{},paid:{},cat:{},pay:{},day:{}};
  Z().tx.forEach(t=>{const r=rate(t.cur)||0,v=t.amt*r;o.tot+=v;o.paid[t.by]=(o.paid[t.by]||0)+v;
@@ -169,41 +185,41 @@ function vList(){
  const it=[...z.tx.map(t=>({...t,k:'e'})),...z.w.map(w=>({...w,k:'w'}))].sort((x,y)=>y.date.localeCompare(x.date)||y.id-x.id);
  const dt={},cum={};z.tx.forEach(t=>dt[t.date]=(dt[t.date]||0)+t.amt*(rate(t.cur)||0));
  const ds=[...new Set(it.map(t=>t.date))].sort();let run=0;ds.forEach(d=>{run+=dt[d]||0;cum[d]=run});
- const row=t=>{if(t.k=='w')return`<div class="it"><div><b>🏧 ${esc(t.label||'Withdrawal')}</b><div class="mu">${esc(t.who||S.owner)} · 1 ${esc(t.cur)} = ${(t.php/t.fc).toFixed(4)} ${b}</div></div><div class="r"><b>${f(t.fc)} ${esc(t.cur)}</b><div class="mu">${f(t.php)} ${b}</div></div><button class="x" onclick="delW(${t.id})">✕</button></div>`;
-  const r=rate(t.cur)||0;return`<div class="it"><div><b>${ce(t.cat)} ${esc(t.det)}</b><div class="mu">${esc(t.cat)} · ${esc(ml(t))}</div><div class="mu">${t.sh.map(x=>esc(x.p)+' '+f(x.a)).join(' · ')}</div></div><div class="r"><b>${f(t.amt)} ${esc(t.cur)}</b>${t.cur!=B()?`<div class="mu">${f(t.amt*r)} ${b}</div>`:''}</div><button class="x" onclick="del(${t.id})">✕</button></div>`};
+ const row=t=>{if(t.k=='w')return`<div class="it" onclick="ew(${t.id})"><div><b>🏧 ${esc(t.label||'Withdrawal')}</b><div class="mu">${esc(t.who||S.owner)} · 1 ${esc(t.cur)} = ${(t.php/t.fc).toFixed(4)} ${b}</div></div><div class="r"><b>${f(t.fc)} ${esc(t.cur)}</b><div class="mu">${f(t.php)} ${b}</div></div></div>`;
+  const r=rate(t.cur)||0;return`<div class="it" onclick="eo(${t.id})"><div><b>${ce(t.cat)} ${esc(t.det)}</b><div class="mu">${esc(t.cat)} · ${esc(ml(t))}</div><div class="mu">${t.sh.map(x=>esc(x.p)+' '+f(x.a)).join(' · ')}</div></div><div class="r"><b>${f(t.amt)} ${esc(t.cur)}</b>${t.cur!=B()?`<div class="mu">${f(t.amt*r)} ${b}</div>`:''}</div></div>`};
  let h=`<div class="card"><div class="mu">Total paid</div><b>${f(a.tot)} ${b}</b><div class="mu" style="margin-top:6px">${Object.entries(a.per).map(([p,v])=>esc(p)+' '+f(v)).join(' · ')}</div></div>`;
  ds.slice().reverse().forEach(d=>{const e=it.filter(t=>t.date==d);
   h+=`<div class="g"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'})}<small>${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} ${e.length==1?'entry':'entries'}</small></span><span style="text-align:right">${f(dt[d]||0)} ${b}<small>Trip total ${f(cum[d])} ${b}</small></span></div>${e.map(row).join('')}</div>`});
  return h+(it.length?'':'<div class="mu">No entries yet.</div>')}
-function del(id){if(!okc())return;if(confirm('Delete this entry?')){Z().tx=Z().tx.filter(t=>t.id!=id);cd('tx',id);save();tab()}}
+function del(id){if(!okc())return;if(confirm('Delete this entry?')){Z().tx=Z().tx.filter(t=>t.id!=id);cd('tx',id);save();cl()}}
 function delW(id){if(!okc())return;const z=Z(),n=z.w.filter(x=>x.id!=id);
  if(z.tx.some(t=>t.cur!=z.base&&!n.some(x=>x.cur==t.cur)))return alert('Entries still use that currency, so the withdrawal stays');
- if(confirm('Delete this withdrawal?')){z.w=n;cd('w',id);save();tab()}}
+ if(confirm('Delete this withdrawal?')){z.w=n;cd('w',id);save();cl()}}
 function tb(i){const z=Z(),p=S.people[i],j=z.bp.indexOf(p);j<0?z.bp.push(p):z.bp.splice(j,1);save();tab()}
-let P=null;
-const newP=()=>({date:Z().start||today(),time:'',title:'',place:'',url:'',cat:S.cats.includes('Activities')?'Activities':S.cats[0],est:''});
+let P=null,PD='';
+const newP=()=>({date:PD||Z().start||today(),time:'',title:'',place:'',note:'',url:'',cat:S.cats.includes('Activities')?'Activities':S.cats[0],est:''});
+const mp=x=>x.url||(x.place?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(x.place):'');
 function vPlan(){
- if(!P)P=newP();
- const z=Z(),b=esc(B()),it=z.it||[],tot=it.reduce((s,x)=>s+(+x.est||0),0);
- const mp=x=>x.url||(x.place?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(x.place):'');
- const ds={};it.forEach(x=>(ds[x.date]=ds[x.date]||[]).push(x));
+ const z=Z(),b=esc(B()),it=z.it||[],tot=it.reduce((s,x)=>s+(+x.est||0),0),ds={};
+ it.forEach(x=>(ds[x.date]=ds[x.date]||[]).push(x));
+ let h=`<div class="card"><div class="two"><div><div class="mu">Estimated total</div><b>${f(tot)} ${b}</b></div><div><div class="mu">${z.budget?'Budget':'Stops'}</div><b>${z.budget?f(z.budget)+' '+b:it.length}</b></div></div>${z.budget?`<div class="mu" style="margin-top:6px">${tot<=z.budget?'Within budget by '+f(z.budget-tot):'Over budget by '+f(tot-z.budget)} ${b}</div>`:''}</div>`;
+ Object.keys(ds).sort().forEach(d=>{const e=ds[d].sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')),sb=e.reduce((s,x)=>s+(+x.est||0),0);
+  h+=`<div class="g"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}<small>${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} stop${e.length==1?'':'s'}</small></span><span>${f(sb)} ${b}</span></div>${e.map(x=>{const m=mp(x);return`<div class="tl" onclick="ei(${x.id})"><div class="t">${esc(x.time||'')}</div><div class="b"><b>${ce(x.cat)} ${esc(x.title)}</b>${x.place?`<div class="mu">${esc(x.place)}</div>`:''}${x.note?`<div class="mu" style="font-style:italic">${esc(x.note)}</div>`:''}${m?`<a class="chip" style="display:inline-block;margin-top:6px;text-decoration:none" href="${esc(m)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📍 Open in Maps</a>`:''}</div><div class="r"><b>${x.est?f(x.est):''}</b></div></div>`}).join('')}</div>`});
+ return h+(it.length?'':'<div class="card mu">No stops yet. Tap + to add the first one.</div>')+`<button class="fab" onclick="P=newP();SH='stop';tab()">+</button>`}
+function pForm(){const b=esc(B());
  const o=(a,v)=>a.map(c=>`<option value="${esc(c)}" ${c==v?'selected':''}>${ce(c)} ${esc(c)}</option>`).join('');
- let h=`<div class="card"><div class="two"><div><div class="mu">Estimated total</div><b>${f(tot)} ${b}</b></div><div><div class="mu">${z.budget?'Budget':'Stops'}</div><b>${z.budget?f(z.budget)+' '+b:it.length}</b></div></div>${z.budget?`<div class="mu" style="margin-top:6px">${tot<=z.budget?'Within budget by '+f(z.budget-tot):'Over budget by '+f(tot-z.budget)} ${b}</div>`:''}</div>
-<div class="card"><h3>${P.id?'Edit stop':'Add a stop'}</h3>
-<div class="two"><label>Date<input type="date" value="${P.date}" oninput="P.date=this.value"></label><label>Time<input type="time" value="${P.time}" oninput="P.time=this.value"></label></div>
+ return`<div class="card"><div class="two"><label>Date<input type="date" value="${P.date}" oninput="P.date=this.value"></label><label>Time<input type="time" value="${P.time}" oninput="P.time=this.value"></label></div>
 <label>What<input value="${esc(P.title)}" placeholder="e.g. Dinner at Pho 24" oninput="P.title=this.value"></label>
 <label>Place<input value="${esc(P.place)}" placeholder="Name or address" oninput="P.place=this.value"></label>
+<label>Note<textarea rows="2" placeholder="Booking ref, tips, who is joining" oninput="P.note=this.value">${esc(P.note||'')}</textarea></label>
 <label>Google Maps link (optional)<input type="url" value="${esc(P.url)}" placeholder="Paste a link from Google Maps" oninput="P.url=this.value"></label>
 <div class="two"><label>Category<select onchange="P.cat=this.value">${o(S.cats,P.cat)}</select></label><label>Estimate (${b})<input type="number" inputmode="decimal" step="any" value="${esc(P.est)}" oninput="P.est=this.value"></label></div>
-<button class="btn" onclick="addI()">${P.id?'Save changes':'Add stop'}</button>${P.id?`<div class="chips" style="margin-top:8px"><button class="chip" onclick="P=newP();tab()">Cancel edit</button></div>`:''}</div>`;
- Object.keys(ds).sort().forEach(d=>{const e=ds[d].sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')),sb=e.reduce((s,x)=>s+(+x.est||0),0);
-  h+=`<div class="g"><div class="gh"><span>${new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}<small>${z.start?'Day '+(dd(z.start,d)+1)+' · ':''}${e.length} stop${e.length==1?'':'s'}</small></span><span>${f(sb)} ${b}</span></div>${e.map(x=>{const m=mp(x);return`<div class="it"><div><div class="mu">${esc(x.time||'')}</div><b>${ce(x.cat)} ${esc(x.title)}</b>${x.place?`<div class="mu">${esc(x.place)}</div>`:''}${m?`<a class="chip" style="display:inline-block;margin-top:6px;text-decoration:none" href="${esc(m)}" target="_blank" rel="noopener">📍 Open in Maps</a>`:''}</div><div class="r"><b>${x.est?f(x.est):''}</b></div><button class="x" onclick="ei(${x.id})">✎</button><button class="x" onclick="di(${x.id})">✕</button></div>`}).join('')}</div>`});
- return h+(it.length?'':'<div class="mu">No stops yet. Add the first one above.</div>')}
+<button class="btn" onclick="addI()">${P.id?'Save changes':'Add stop'}</button>${P.id?`<button class="btn" style="margin-top:10px;background:none;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)" onclick="di(${P.id})">Delete stop</button>`:''}</div>`}
 function addI(){if(!okc())return;if(!P.title.trim())return alert('Enter what or where');
- const z=Z();z.it=z.it||[];const o={id:P.id||Date.now(),date:P.date,time:P.time||'',title:P.title.trim(),place:(P.place||'').trim(),url:(P.url||'').trim(),cat:P.cat,est:+P.est||0};
- const i=z.it.findIndex(x=>x.id==o.id);i<0?z.it.push(o):z.it[i]=o;cw('it',o);save();const d=P.date;P=newP();P.date=d;tab('plan');toast('Saved')}
-function ei(id){P={...Z().it.find(x=>x.id==id)};P.est=P.est||'';tab('plan');scrollTo(0,0)}
-function di(id){if(!okc())return;if(confirm('Delete this stop?')){Z().it=Z().it.filter(x=>x.id!=id);cd('it',id);save();tab()}}
+ const z=Z();z.it=z.it||[];const o={id:P.id||Date.now(),date:P.date,time:P.time||'',title:P.title.trim(),place:(P.place||'').trim(),note:(P.note||'').trim(),url:(P.url||'').trim(),cat:P.cat,est:+P.est||0};
+ const i=z.it.findIndex(x=>x.id==o.id);i<0?z.it.push(o):z.it[i]=o;cw('it',o);PD=o.date;save();cl();toast('Saved')}
+function ei(id){const x=Z().it.find(v=>v.id==id);if(!x)return;P={...x,note:x.note||'',est:x.est||''};SH='stop';tab()}
+function di(id){if(!okc())return;if(confirm('Delete this stop?')){Z().it=Z().it.filter(x=>x.id!=id);cd('it',id);save();cl()}}
 function vRep(){
  const z=Z(),a=agg(),b=esc(B());
  if(!z.tx.length)return'<div class="card mu">No entries yet.</div>';
@@ -244,24 +260,38 @@ function ee(i){const c=S.cats[i],e=prompt('Emoji for '+c,ce(c));if(e){S.ce[c]=e.
 function rmC(i){const c=S.cats[i];if(S.trips.some(t=>t.tx.some(x=>x.cat==c)))return alert('Used in entries, so it stays');S.cats.splice(i,1);save();tab('set')}
 function bk(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='trip-ledger-backup.json';a.click()}
 function rst(el){if(!el.files[0]||!confirm('Replace everything in the app with this backup?'))return;const r=new FileReader();r.onload=()=>{try{S={...D,...JSON.parse(r.result)};save();L=null;tab('set')}catch(e){alert('Not a valid backup file')}};r.readAsText(el.files[0])}
-function vSet(){const z=Z(),b=esc(z.base);
+function vSet(){const z=Z(),c=window.CU;
+ const row=(k,t,sm)=>`<div class="mr" onclick="op('${k}')"><span><b>${t}</b><div class="mu">${sm}</div></span><span class="mu">›</span></div>`;
+ return`${S.owner?'':'<div class="card">Start here: open <b>You & your cards</b> below and enter your name.</div>'}
+<button class="btn" onclick="op('trip')">Create / update trip</button><div class="mu" style="margin:6px 4px 12px">Current: ${esc(z.name)} · ${esc(z.base)}</div>
+<button class="btn" style="background:var(--bar);color:var(--ac2)" onclick="op('cloud')">Cloud sync</button><div class="mu" style="margin:6px 4px 12px">${c?esc(c.email)+(c.ok?'':' (not verified)'):'Not signed in'}${z.cid?' · this trip is shared':''}</div>
+<div class="card" style="padding:0 12px">${row('cur','Currencies',cu().map(esc).join(' · '))}${row('me','You & your cards',esc(S.owner||'Not set'))}${row('ppl','People',S.people.length+' people')}${row('grp','Saved groups',S.groups.length+' saved')}${row('cat','Categories',S.cats.length+' categories')}${row('bk','Backup','Download or restore')}</div>`}
+const op=k=>{SH=k;tab()};
+function cl(){SH=null;if(LD){L=LD;LD=null}P=null;tab()}
+const fromTx=t=>{const v=t.sh.map(x=>x.a),eq=Math.max(...v)-Math.min(...v)<.005;return{...newL(),k:'e',date:t.date,det:t.det,amt:String(t.amt),m:t.m,c:t.cur,cat:t.cat,by:t.by,p:t.sh.map(x=>x.p),mode:eq?'eq':'ex',ex:Object.fromEntries(t.sh.map(x=>[x.p,String(x.a)])),eid:t.id}};
+const fromW=w=>({...newL(),k:'w',date:w.date,wl:w.label||'',wb:w.who||S.owner,wc:w.cur,wp:String(w.php),wf:String(w.fc),eid:w.id});
+function eo(id){const t=Z().tx.find(x=>x.id==id);if(!t)return;if(!LD)LD=L;L=fromTx(t);SH='tx';tab()}
+function ew(id){const w=Z().w.find(x=>x.id==id);if(!w)return;if(!LD)LD=L;L=fromW(w);SH='wd';tab()}
+function shHTML(){if(!SH)return'';let t,c;
+ if(SH=='tx'||SH=='wd'){t=SH=='tx'?'Edit entry':'Edit withdrawal';c=vLog()}
+ else if(SH=='stop'){if(!P)P=newP();t=P.id?'Edit stop':'Add a stop';c=pForm()}
+ else[t,c]=sbody(SH);
+ return`<div class="ov" onclick="cl()"><div class="sheet" onclick="event.stopPropagation()"><div class="shh"><b>${t}</b><button class="x" onclick="cl()">✕</button></div>${c}</div></div>`}
+function sbody(k){const z=Z(),b=esc(z.base),c=window.CU,own=!z.cid||(c&&c.ok&&z.owner==c.email);
  const li=(a,fn)=>a.map((x,i)=>`<div class="li"><span>${esc(x)}</span><button class="x" onclick="${fn}(${i})">✕</button></div>`).join('');
  const ad=(id,ph,fn)=>`<div class="two" style="grid-template-columns:1fr auto;margin-top:8px"><input id="${id}" placeholder="${ph}"><button class="btn sm" onclick="${fn}()">Add</button></div>`;
- const cl=cu().filter(c=>c!=z.base).map(c=>`<div class="li"><span>${esc(c)}</span><span class="mu">1 ${esc(c)} = ${rate(c).toFixed(4)} ${b} · ${z.w.filter(x=>x.cur==c).length} withdrawal(s)</span></div>`).join('')||'<div class="mu">Log a withdrawal (Log tab) to add a foreign currency.</div>';
- return`<div class="card"><h3>This trip</h3>
-<label>Trip name<input value="${esc(z.name)}" onchange="Z().name=this.value;save();tab()"></label>
-<div class="two"><label>Start<input type="date" value="${z.start}" onchange="Z().start=this.value;save()"></label><label>End<input type="date" value="${z.end}" onchange="Z().end=this.value;save()"></label></div>
+ if(k=='trip')return['Trip',`<label>Trip name<input value="${esc(z.name)}" onchange="Z().name=this.value;save();tab()"></label>
+<div class="two"><label>Start<input type="date" value="${z.start||''}" onchange="Z().start=this.value;save();tab()"></label><label>End<input type="date" value="${z.end||''}" onchange="Z().end=this.value;save();tab()"></label></div>
 <label>Home currency<input value="${b}" onchange="Z().base=this.value.trim().toUpperCase()||'PHP';save();tab()"></label>
-<button class="btn sm" onclick="dt()">Delete this trip</button></div>
-${vCloud()}<div class="card"><h3>Currencies (this trip)</h3><div class="li"><span>${b}</span><span class="mu">home currency</span></div>${cl}</div>
-<div class="card"><h3>You & your cards</h3><label>Your name<input value="${esc(S.owner)}" onchange="setOwner(this.value)"></label>
-<div class="two"><label>Debit card<input value="${esc(S.acc.debit)}" onchange="S.acc.debit=this.value;save()"></label><label>Credit card<input value="${esc(S.acc.credit)}" onchange="S.acc.credit=this.value;save()"></label></div></div>
-<div class="card"><h3>People</h3>${li(S.people,'rmP')}${ad('np','Add person','addP')}</div>
-<div class="card"><h3>Saved groups</h3>${li(S.groups.map(g=>g.n+' ('+g.p.length+')'),'rmG')||'<div class="mu">Save a group from the Log screen.</div>'}</div>
-<div class="card"><h3>Categories</h3>${S.cats.map((c,i)=>`<div class="li"><span><a onclick="ee(${i})">${ce(c)}</a> ${esc(c)}</span><button class="x" onclick="rmC(${i})">✕</button></div>`).join('')}${ad('nc','🎫 Add category','addC')}<div class="mu" style="margin-top:6px">Tip: start with an emoji, e.g. 🎫 Tickets. Tap an emoji in the list to change it.</div></div>
-<div class="card"><h3>Backup</h3><div class="mu">Your data lives only on this phone. Download a backup now and then.</div><br>
-<button class="btn sm" onclick="bk()">Download backup</button>
-<label class="btn sm" style="display:inline-block;color:var(--on);margin:0 0 0 8px">Restore<input type="file" accept=".json" hidden onchange="rst(this)"></label></div>`}
+<button class="btn" onclick="nt()">+ Create a new trip</button>
+${own?`<button class="btn" style="margin-top:10px;background:none;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)" onclick="dt()">Delete this trip</button>`:'<div class="mu" style="margin-top:10px">Only the person who created this trip can delete it.</div>'}`];
+ if(k=='cloud')return['Cloud sync',vCloud()];
+ if(k=='cur'){const cr=cu().filter(x=>x!=z.base).map(x=>`<div class="li"><span>${esc(x)}</span><span class="mu">1 ${esc(x)} = ${rate(x).toFixed(4)} ${b} · ${z.w.filter(v=>v.cur==x).length} withdrawal(s)</span></div>`).join('')||'<div class="mu" style="margin-top:8px">Log a withdrawal (Log tab) to add a foreign currency.</div>';return['Currencies (this trip)',`<div class="li"><span>${b}</span><span class="mu">home currency</span></div>${cr}`]}
+ if(k=='me')return['You & your cards',`<label>Your name<input value="${esc(S.owner)}" onchange="setOwner(this.value)"></label><div class="two"><label>Debit card<input value="${esc(S.acc.debit)}" onchange="S.acc.debit=this.value;save()"></label><label>Credit card<input value="${esc(S.acc.credit)}" onchange="S.acc.credit=this.value;save()"></label></div>`];
+ if(k=='ppl')return['People',li(S.people,'rmP')+ad('np','Add person','addP')];
+ if(k=='grp')return['Saved groups',li(S.groups.map(g=>g.n+' ('+g.p.length+')'),'rmG')||'<div class="mu">Save a group from the Log screen.</div>'];
+ if(k=='cat')return['Categories',S.cats.map((x,i)=>`<div class="li"><span><a onclick="ee(${i})">${ce(x)}</a> ${esc(x)}</span><button class="x" onclick="rmC(${i})">✕</button></div>`).join('')+ad('nc','🎫 Add category','addC')+'<div class="mu" style="margin-top:6px">Tip: start with an emoji, e.g. 🎫 Tickets. Tap an emoji in the list to change it.</div>'];
+ return['Backup',`<div class="mu">Your data lives on this phone. Download a backup now and then.</div><br><button class="btn sm" onclick="bk()">Download backup</button><label class="btn sm" style="display:inline-block;color:var(--on);margin:0 0 0 8px">Restore<input type="file" accept=".json" hidden onchange="rst(this)"></label>`]}
 var cloud={
  trip(cid,d){RM=true;try{let z=S.trips.find(t=>t.cid==cid);
   if(!z){z=mk(d.name,d.base);z.id=Date.now()+S.trips.length;z.cid=cid;S.trips.push(z)}
@@ -277,7 +307,7 @@ const okc=()=>{const z=Z();if(!z.cid||(window.CU&&CU.ok))return true;alert('This
 const msg=x=>({'auth/invalid-credential':'Wrong email or password','auth/email-already-in-use':'That email already has an account: use Sign in','auth/weak-password':'Use at least 6 characters','auth/invalid-email':'Invalid email','auth/network-request-failed':'No internet connection','permission-denied':'Not allowed. If you just verified your email, sign out and sign in again. Otherwise check the Firestore rules and that you are a member.'}[x.code]||x.code||'Something went wrong');
 const cw=(k,o)=>{const z=Z();if(z.cid)FB.set(z.cid,k,o).catch(e=>alert(msg(e)))};
 const cd=(k,i)=>{const z=Z();if(z.cid)FB.del(z.cid,k,i).catch(e=>alert(msg(e)))};
-function vCloud(){const z=Z(),c=window.CU,h=t=>`<div class="card"><h3>Cloud sync</h3>${t}</div>`;
+function vCloud(){const z=Z(),c=window.CU,h=t=>`<div>${t}</div>`;
  if(window.FB===undefined)return h('<div class="mu">Loading…</div>');
  if(!FB)return h('<div class="mu">Not set up. Put your Firebase keys in config.js and upload it.</div>');
  if(!c)return h(`<label>Email<input id="ce" type="email" autocomplete="username"></label><label>Password<input id="cp" type="password" autocomplete="current-password"></label><button class="btn" onclick="ca('login')">Sign in</button><div class="chips" style="margin-top:10px"><button class="chip" onclick="ca('signup')">Create account</button><button class="chip" onclick="ca('reset')">Forgot password</button></div><div class="mu">Use the email you were invited with.</div>`);
